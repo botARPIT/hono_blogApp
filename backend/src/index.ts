@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import mainRouter from './routes/router'
-import hashPassword from './utils/hashPassword'
+import createHash from './utils/hash'
 
 
 const app = new Hono()

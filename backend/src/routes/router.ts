@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { userRouter } from "../user/routes/auth.route";
+import { userRouter } from "./user.route";
 
 const mainRouter = new Hono();
 

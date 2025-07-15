@@ -7,7 +7,9 @@
     "nodejs_compat"
   ],
   "vars": {
-   "DATABASE_URL": "prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiMDFKWkpHUFBZNERINkRNN0oyODZGOFRGMFAiLCJ0ZW5hbnRfaWQiOiI2ZDkyMWEzNTljN2NiZTY3OWFiMjczYWVkYTU1OWJjOGNlNGVmMDZmOGMzNzE0Mzg1MzA5MzRhNzZjYzg1Yjg5IiwiaW50ZXJuYWxfc2VjcmV0IjoiNjAwOWVhMzAtYTAwZC00Mjk5LTk3Y2EtZDI4YzVlMDRmZTllIn0.VtHJIvOTedwWrGlJ-QuO_jJnk9_k3Ra_ksXruWjmHXw"
+   "DATABASE_URL": "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19BbTcta1llZzVPNWpSSXBZVkh6Uy0iLCJhcGlfa2V5IjoiMDFKWldOQ0ROQVRHWVNIS1E3WEdEM1M4MkUiLCJ0ZW5hbnRfaWQiOiIzMTYzMjVhOTg0MDNhNzM5NDU4ZjlmZjA2YTFkYThkZGFjOTVlZGRiYmNjMDg3NzUwZmM2ZjU4ZWU5OTNhODM2IiwiaW50ZXJuYWxfc2VjcmV0IjoiMjcxZWQ0MGYtZWE1OC00NmYxLTg4MTMtYTM4NTM1NzQzNDUwIn0.6fZdLCDCuy1AE6u6h_NySp0a_S_J_ImXkRAsalnmRVU",
+   "JWT_ACCESS_SECRET":"This is a secret",
+   "JWT_REFRESH_SECRET":"Refresh secret"
   },
   // "kv_namespaces": [
   //   {
