@@ -1,18 +1,17 @@
 
 import { Hono } from "hono";
 import { setCookie } from "hono/cookie"
-import { createUserService, signin } from "../services/user.service";
-import { generateAccessToken, generateRefreshToken, jwtVerify } from "../utils/jwt";
-import { signInMiddleware } from "../middlewares/auth.middleware";
+import { createUserService } from "../services/user.service";
+import { generateAccessToken,  jwtVerify } from "../utils/jwt";
+
 import 'dotenv/config'
-import { UserDTO, userSignUpSchema } from "../types/user.types";
+
 import { Bindings } from '../types/binding.types';
 import createController from "../controllers/user.controller";
 
 
 
-export type UserSignUpDTO = Pick<UserDTO, 'name' | 'email' | 'password'>
-export type UserSignInDTO = Pick<UserDTO, 'email' | 'password'>
+
 
 type authHeader = {
    token: string

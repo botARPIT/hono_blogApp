@@ -14,12 +14,16 @@ export const userSignInSchema = z.object({
 
 })
 
-export type UserDTO = {
+ type UserDTO = {
     id: string,
     name: string,
     email: string,
     password: string,
-    createdAt: string,
-    updatedAt: string,
+    createdAt: Date,
+    updatedAt: Date,
     isAdmin: boolean
 }
+
+export type CreatedUser = Pick<UserDTO, 'id' | 'email' | 'name' | 'createdAt'>
+export type UserSignUpDTO = Pick<UserDTO, 'name' | 'email' | 'password'>
+export type UserSignInDTO = Pick<UserDTO, 'email' | 'password'>
