@@ -39,8 +39,9 @@ class UserService {
       if (!hasValidPass) {
         throw new Error("Invalid pass")
       }
-
-      const { accessToken, refreshToken } = generateTokens(dto, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
+      const {id, name} = user
+      const payload = {id, name}
+      const { accessToken, refreshToken } = generateTokens(payload, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
       return { accessToken: accessToken, refreshToken: refreshToken }
 
     } catch (error) {

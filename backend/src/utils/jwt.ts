@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
-type JwtPayload = {
-    id? : string,
-    email: string,
-    role? : string
-}
+import { JwtPayload } from "../types/jwt.types";
+
 
 export function generateAccessToken(payload: JwtPayload, ACCESS_KEY: string) : string {
     return jwt.sign( payload , ACCESS_KEY, { expiresIn: "1h" })

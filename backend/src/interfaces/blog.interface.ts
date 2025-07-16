@@ -3,6 +3,6 @@ import { Result } from "../types/result";
 
 
 
-export interface BlogPolicy<T> {
-    validate(dto: T) : Result<T, ValidationError>
+export interface AddBlogPolicy<T> {
+    validateAddBlog(dto: T) : Result<T, ValidationError>
 }

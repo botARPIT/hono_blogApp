@@ -15,4 +15,15 @@ blogRouter.post('/addBlog', async (c) => {
    }
 })
 
+blogRouter.patch('/updateBlog/:id', async (c) => {
+   try {
+      if(!c.env) return c.json({message: "Server configuration error"}, 500)
+         const service = createBlogService(c.env)
+      const controller = createBlogController(service)
+      return await controller.updateBlog(c)
+   } catch (error) {
+      throw new Error(`Error updating the blog: ${error}`)
+   }
+})
+
 export {blogRouter}

@@ -33,9 +33,6 @@ export async function findUniqueUser(email: string, dbUrl: string) {
             select: {
                 id: true,
                 name: true,
-                email: true,
-                createdAt: true,
-                updatedAt: true,
                 password: true
             }
         })
