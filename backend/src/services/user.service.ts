@@ -1,6 +1,5 @@
 import { createHash, compareHash } from "../utils/hash";
 import { userSignUpSchema, userSignInSchema, CreatedUser, UserSignUpDTO, UserSignInDTO } from "../types/user.types"
-import bcrypt from "bcryptjs";
 import { createUser, findUniqueUser } from "../repositories/user.repository";
 
 import { Bindings } from "../types/binding.types";

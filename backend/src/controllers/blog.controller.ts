@@ -26,6 +26,28 @@ class BlogController{
         return c.json(result)
 
     }
+
+    async getBlogs(c :Context){
+        const page = parseInt(c.req.param('page'))
+        if(Number.isNaN(page) || page <= 0) return c.json({message: "Missing / Invalid page number"}, 400)
+            const result = await this.blogService.getBlogs(page)
+        return c.json(result)
+    }
+
+    async deleteBlog(c: Context){
+        const id : string = c.req.param('id')
+        const {authorId} = await c.req.json()
+        if(!id || !authorId) return c.json({message: "Blog id or author id missing"}, 500)
+        const result = await this.blogService.delete(id, authorId)
+        return c.json(result)
+    }
+
+    async getBlog(c: Context){
+        const id = c.req.param('id')
+        if(!id) return c.json({message: "Blog id missing"}, 500)
+            const result = await this.blogService.getBlog(id)
+        return c.json(result)
+    }
 }
 
 // factory function
