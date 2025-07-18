@@ -1,4 +1,4 @@
-import { Blog } from "@prisma/client/edge";
+
 import {z} from "zod";
 export type BlogDTO = {
     id: string,
@@ -15,7 +15,7 @@ export type BlogDTO = {
 
 export type AddBlogDTO = Pick<BlogDTO, 'title'  |'content'| 'thumbnail' | 'authorId'>
 export type CreatedBlogDTO = Omit<BlogDTO, 'updatedAt' | 'published' | 'like'>
-export type UpdateBlogDTO = Partial<Pick<BlogDTO, 'title' | 'content' | 'thumbnail' | 'authorId'>>
+export type UpdateBlogDTO = Partial<Pick<BlogDTO, 'title' | 'content' | 'thumbnail'>>
 export type GetBlogDTO = Omit<BlogDTO, 'createdAt' | 'published'>
 export type DeletedBlogDTO = BlogDTO
 

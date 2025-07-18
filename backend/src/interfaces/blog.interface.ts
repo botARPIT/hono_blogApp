@@ -1,5 +1,5 @@
-import { ValidationError } from "../types/error";
-import { Result } from "../types/result";
+import { ValidationError } from "../types/error.types";
+import { Result } from "../types/result.type";
 
 
 

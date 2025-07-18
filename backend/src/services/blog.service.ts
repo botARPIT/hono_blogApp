@@ -6,13 +6,13 @@ import { JwtPayload } from "../types/jwt.types";
 class BlogService {
     constructor(private env : Bindings) {}
     async addBlog(dto: AddBlogDTO): Promise<CreatedBlogDTO>{
-        const blog = await createBlog(dto, this.env.DATABASE_URL)
-        return blog
+       return await createBlog(dto, this.env.DATABASE_URL)
+         
     }
 
-    async update(dto: UpdateBlogDTO, blogId: string) : Promise<UpdateBlogDTO>{
-        const blog = await updateBlog(dto, blogId, this.env.DATABASE_URL)
-        return blog
+    async update(dto: UpdateBlogDTO, blogId: string, authorId: string) : Promise<UpdateBlogDTO>{
+        return await updateBlog(dto, blogId, authorId, this.env.DATABASE_URL)
+
     }
 
     async getBlogs(page: number) : Promise<GetBlogDTO[]> {
@@ -20,15 +20,13 @@ class BlogService {
     }
 
     async delete(id: string, authorId: string): Promise<DeletedBlogDTO>{
-        const result =  await deleteBlog(id, authorId, this.env.DATABASE_URL)
-        if(!result.success) throw new Error(`Delete failed: ${String(result.error)}`)
-        return result.data
+        return await deleteBlog(id, authorId, this.env.DATABASE_URL)
+      
     }
 
     async getBlog(id: string) : Promise<GetBlogDTO>{
-        const result = await getBlogById(id, this.env.DATABASE_URL)
-        if(!result.success) throw new Error(`Blog not found: ${String(result.error)}`)
-            return result.data
+       return await getBlogById(id, this.env.DATABASE_URL)
+      
     }
 }
 

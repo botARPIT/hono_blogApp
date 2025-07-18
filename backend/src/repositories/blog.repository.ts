@@ -1,12 +1,12 @@
 
+import { AppError, ErrorCode, NotFoundError } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
 import { Bindings } from "../types/binding.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
-import { PrismaError } from "../types/error";
-import { Result } from "../types/result";
 
 
-export async function createBlog(dto: AddBlogDTO, dbUrl: Bindings["DATABASE_URL"]) {
+
+export async function createBlog(dto: AddBlogDTO, dbUrl: Bindings["DATABASE_URL"]): Promise<CreatedBlogDTO> {
     const prisma = getPrismaClient(dbUrl)
     try {
         const blog = await prisma.blog.create({
@@ -29,11 +29,11 @@ export async function createBlog(dto: AddBlogDTO, dbUrl: Bindings["DATABASE_URL"
 
         return blog
     } catch (error) {
-        throw new Error(`Failed to create blog: ${error}`)
+        throw new AppError("Cannot create blog", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }
 
-export async function updateBlog(dto: UpdateBlogDTO, blogId: string, dbUrl: Bindings["DATABASE_URL"]) {
+export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId :string, dbUrl: Bindings["DATABASE_URL"]): Promise<UpdateBlogDTO> {
     try {
         const prisma = getPrismaClient(dbUrl)
 
@@ -41,13 +41,13 @@ export async function updateBlog(dto: UpdateBlogDTO, blogId: string, dbUrl: Bind
         const updatedBlog = await prisma.blog.update({
             where: {
                 id: blogId,
-                authorId: dto.authorId
+                authorId: authorId
             },
             data: updateData
         })
         return updatedBlog
     } catch (error) {
-        throw new Error(`Failed to update blog: ${error}`)
+       throw new AppError("Cannot update blog", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }
 
@@ -70,27 +70,26 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
         })
         return allBlogs
     } catch (error) {
-        throw new Error(`Cannot get blogs: ${String(error)}`)
+        throw new AppError("Failed to get blogs", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }
 
-export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<Result<DeletedBlogDTO, PrismaError>> {
+export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<DeletedBlogDTO> {
     try {
         const prisma = getPrismaClient(dbUrl)
-        const result = await prisma.blog.delete({
+        const deletedBlog = await prisma.blog.delete({
             where: {
                 authorId,
                 id
             }
         })
-        return { success: true, data: result }
-
+        return deletedBlog
     } catch (error: unknown) {
-        return { success: false, error: { message: String(error) } }
+       throw new AppError("Failed to delete blog", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }
 
-export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): Promise<Result<GetBlogDTO, PrismaError>> {
+export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO> {
     try {
         const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.findUnique({
@@ -107,9 +106,9 @@ export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): P
                 like: true
             }
         })
-        if(!blog) return {success: false, error: {code :"P2025", message: "Blog not found"}}
-        return {success: true, data: blog}
-    } catch (error: unknown) {
-           return { success: false, error: { message: String(error) } }
+        if(!blog) throw new NotFoundError("Blog not found")
+        return blog
+    } catch (error) {
+          throw new AppError("Cannot find the blog", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }

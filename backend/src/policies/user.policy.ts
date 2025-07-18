@@ -1,7 +1,7 @@
 import { SignInPolicy, SignUpPolicy } from "../interfaces/user.interface"
 
-import { AuthError, ValidationError } from "../types/error"
-import { Result } from "../types/result"
+import { AuthError, ValidationError } from "../types/error.types"
+import { Result } from "../types/result.type"
 import {  UserSignInDTO, userSignInSchema, UserSignUpDTO, userSignUpSchema } from "../types/user.types"
 
  class UserInputPolicy implements SignUpPolicy<UserSignUpDTO>, SignInPolicy<UserSignInDTO>{
