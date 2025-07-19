@@ -1,7 +1,6 @@
 import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog } from "../repositories/blog.repository";
 import { Bindings } from "../types/binding.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
-import { JwtPayload } from "../types/jwt.types";
 
 class BlogService {
     constructor(private env : Bindings) {}

@@ -3,13 +3,14 @@ import { createUserService } from "../services/user.service";
 
 import { userInputPolicy } from "../policies/user.policy";
 import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
+import { ZodError } from "../errors/app-error";
 
  class UserController{
     constructor(private userService : ReturnType<typeof createUserService> ){}
     async signup(c: Context){
         const body = await c.req.json<UserSignUpDTO>();
         const inputValidation = userInputPolicy.validateSignUp(body)
-        if(!inputValidation.success) return c.json({message: "Cannot validate input", error: inputValidation.error}, 400)
+        if(!inputValidation.success) throw new ZodError("Zod validation failed")
         const result = await this.userService.signup(inputValidation.data)
         return c.json(result)
         
@@ -18,7 +19,7 @@ import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
     async signin(c: Context){
         const body = await c.req.json<UserSignInDTO>()
         const inputValidation = userInputPolicy.validateSignIn(body)
-        if(!inputValidation.success) return c.json({message: "Cannot authenticate user", error: inputValidation.error}, 400)
+        if(!inputValidation.success) throw new ZodError("Zod validation failed")
             const result = await this.userService.signin(inputValidation.data)
         return c.json(result)
     }

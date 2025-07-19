@@ -46,3 +46,9 @@ export class BadRequestError extends AppError{
         super(message, 400, ErrorCode.BAD_REQUEST)
     }
 }
+
+export class ZodError extends AppError{
+    constructor(message: string){
+        super(message, 400, ErrorCode.ZOD_ERROR)
+    }
+}

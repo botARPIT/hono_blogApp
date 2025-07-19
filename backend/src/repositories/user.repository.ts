@@ -1,4 +1,5 @@
 
+import { AppError, BadRequestError, ErrorCode } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
 
 export async function createUser(name: string, email: string, password: string, dbUrl: string) {
@@ -17,16 +18,18 @@ export async function createUser(name: string, email: string, password: string, 
                 createdAt: true
             }
         })
-        return user
+        if(!user) throw new BadRequestError("User already exists")
+         return user 
     } catch (error) {
-        throw new Error("Prisma error")
+         console.log(error)
+         throw new AppError("Cannot create user", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }
 
 export async function findUniqueUser(email: string, dbUrl: string) {
     try {
         const prisma = getPrismaClient(dbUrl);
-        const user = prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: {
                 email
             }, 
@@ -36,9 +39,11 @@ export async function findUniqueUser(email: string, dbUrl: string) {
                 password: true
             }
         })
-        if(user) return user
-        else throw new Error("User already exists")
+        console.log(user)
+        if(!user) throw new BadRequestError("User does not exist")
+        else return user 
     } catch (error) {
-        throw new Error("Prisma error")
+        console.log(error)
+        throw new AppError("Cannot find user", 500, ErrorCode.PRISMA_ERROR, error)
     }
 }
