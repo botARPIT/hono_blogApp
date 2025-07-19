@@ -4,9 +4,11 @@ import { createUser, findUniqueUser } from "../repositories/user.repository";
 
 import { Bindings } from "../types/binding.types";
 import { generateAccessToken, generateTokens } from "../utils/jwt";
+import { AppError, BadRequestError, ErrorCode, ValidationError } from "../errors/app-error";
+import { Token } from "../types/jwt.types";
 
 
-type Token = { accessToken: string, refreshToken: string }
+
 
 class UserService {
   constructor(private env: Bindings) { }
@@ -14,29 +16,29 @@ class UserService {
   async signup(dto: UserSignUpDTO): Promise<CreatedUser> {
     try {
       const hashedPass = await createHash(dto.password)
-      if (!hashedPass) throw new Error("Password hashing failed")
+      if (!hashedPass) throw new AppError("Hashing failed")
       const userCreated = await createUser(dto.name, dto.email, hashedPass, this.env.DATABASE_URL)
-
+      console.log("User created", userCreated)
       return userCreated
 
     } catch (error) {
-      throw new Error("Signup failed")
+      throw new BadRequestError("User already exists")
     }
   }
 
   async signin(dto: UserSignInDTO): Promise<Token> {
     try {
-      const t0 = performance.now()
+      // const t0 = performance.now()
       const user = await findUniqueUser(dto.email, this.env.DATABASE_URL)
-      const t1 = performance.now()
-      console.log("From user service: ", t1 - t0)
+      // const t1 = performance.now()
+      // console.log("From user service: ", t1 - t0)
       if (!user) {
-        throw new Error("User not found")
+        throw new BadRequestError("User not found")
       }
       const hasValidPass = await compareHash(dto.password, user.password)
 
       if (!hasValidPass) {
-        throw new Error("Invalid pass")
+        throw new ValidationError("Invalid pass")
       }
       const {id, name} = user
       const payload = {id, name}
@@ -44,7 +46,7 @@ class UserService {
       return { accessToken: accessToken, refreshToken: refreshToken }
 
     } catch (error) {
-      throw new Error("SignIn error")
+     throw new BadRequestError("User does not exist")
     }
   }
 }

@@ -8,14 +8,9 @@ import 'dotenv/config'
 
 import { Bindings } from '../types/binding.types';
 import createController from "../controllers/user.controller";
+import { AppError } from "../errors/app-error";
+import { handleError } from "../errors/handle-error";
 
-
-
-
-
-type authHeader = {
-   token: string
-}
 
 const userRouter = new Hono<{ Bindings: Bindings }>();
 
@@ -25,20 +20,24 @@ userRouter.post('/signup', async (c) => {
       if (!c.env) return c.json({ message: "Server configuration error" }, 503)
       const userService = createUserService(c.env)
       const controller = createController(userService)
-      return controller.signup(c)
+      return await controller.signup(c)
    
    } catch (error) {
       console.log(error)
-      return c.json({ message: "Internal server error" }, 500)
+      return handleError(c, error)
    }
 })
 
 
 userRouter.post('/signin', async (c) => {
-   if (!c.env) return c.json({ message: "Server configuration error" }, 503)
+  try {
+    if (!c.env) return c.json({ message: "Server configuration error" }, 503)
       const userService = createUserService(c.env)
       const controller = createController(userService)
-      return controller.signin(c)
+      return await controller.signin(c)
+  } catch (error) {
+  return handleError(c, error)
+  }
  
    // const { email, password } = await c.req.json<UserSignInDTO>()
 
@@ -64,30 +63,30 @@ userRouter.post('/signin', async (c) => {
 
 })
 
-userRouter.get("/getUser", async (c) => {
-   try {
-      const authHeader = c.req.header("Authorization");
-      if (!authHeader || !authHeader.startsWith("Bearer ")) return c.json({ message: "Invalid token"}, 404)
+// userRouter.get("/getUser", async (c) => {
+//    try {
+//       const authHeader = c.req.header("Authorization");
+//       if (!authHeader || !authHeader.startsWith("Bearer ")) return c.json({ message: "Invalid token"}, 404)
 
-      const token = authHeader.split(" ")[1];
-      if(!token) return c.json({message: "Cannot find token"}, 401)
+//       const token = authHeader.split(" ")[1];
+//       if(!token) return c.json({message: "Cannot find token"}, 401)
 
-      const accessKey = c.env.JWT_ACCESS_SECRET;
-      if (!accessKey) {
-         console.log("JWT access key in missing in environment variables")
-         return c.json({message: "Serve configuration error"}, 500)
+//       const accessKey = c.env.JWT_ACCESS_SECRET;
+//       if (!accessKey) {
+//          console.log("JWT access key in missing in environment variables")
+//          return c.json({message: "Serve configuration error"}, 500)
    
 
-      }
-      const verified = jwtVerify(token as string, accessKey)
-      if (!verified) return c.json({ message: "Invalid access" }, 400)
-      console.log( verified)
-      return c.json(verified)
+//       }
+//       const verified = jwtVerify(token as string, accessKey)
+//       if (!verified) return c.json({ message: "Invalid access" }, 400)
+//       console.log( verified)
+//       return c.json(verified)
 
-   } catch (error) {
-      throw new Error("Internal server error")
-   }
+//    } catch (error) {
+//       throw new AppError("Internal server error")
+//    }
 
-})
+// })
 
 export { userRouter }  
