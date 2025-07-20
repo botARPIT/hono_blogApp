@@ -1,5 +1,6 @@
 
 import {z} from "zod";
+import { Token } from "./jwt.types";
 
 export const userSignUpSchema = z.object({
     name: z.string().toLowerCase().trim(),
@@ -21,7 +22,7 @@ export const userSignInSchema = z.object({
     password: string,
     createdAt: Date,
     updatedAt: Date,
-    isAdmin: boolean
+    isAdmin: boolean,
 }
 
 export type CreatedUser = Pick<UserDTO, 'id' | 'email' | 'name' | 'createdAt'>

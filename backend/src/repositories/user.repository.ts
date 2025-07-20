@@ -39,7 +39,6 @@ export async function findUniqueUser(email: string, dbUrl: string) {
                 password: true
             }
         })
-        console.log(user)
         if(!user) throw new BadRequestError("User does not exist")
         else return user 
     } catch (error) {

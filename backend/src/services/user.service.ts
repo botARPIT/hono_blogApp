@@ -13,13 +13,16 @@ import { Token } from "../types/jwt.types";
 class UserService {
   constructor(private env: Bindings) { }
 
-  async signup(dto: UserSignUpDTO): Promise<CreatedUser> {
+  async signup(dto: UserSignUpDTO): Promise<Token> {
     try {
       const hashedPass = await createHash(dto.password)
+      console.log(hashedPass)
       if (!hashedPass) throw new AppError("Hashing failed")
       const userCreated = await createUser(dto.name, dto.email, hashedPass, this.env.DATABASE_URL)
-      console.log("User created", userCreated)
-      return userCreated
+      const {id, name} = userCreated
+      const payload = {id, name}
+      const token : Token = generateTokens(payload, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
+     return token
 
     } catch (error) {
       throw new BadRequestError("User already exists")
@@ -36,7 +39,6 @@ class UserService {
         throw new BadRequestError("User not found")
       }
       const hasValidPass = await compareHash(dto.password, user.password)
-
       if (!hasValidPass) {
         throw new ValidationError("Invalid pass")
       }
