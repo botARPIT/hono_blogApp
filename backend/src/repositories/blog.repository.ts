@@ -64,11 +64,18 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
                 content: true,
                 thumbnail: true,
                 authorId: true,
-                updatedAt: true,
-                like: true
+                createdAt: true,
+                like: true,
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
+
         return allBlogs
+        
     } catch (error) {
         throw new AppError("Failed to get blogs", 500, ErrorCode.PRISMA_ERROR, error)
     }
@@ -102,7 +109,7 @@ export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): P
                 content: true,
                 thumbnail: true,
                 authorId: true,
-                updatedAt: true,
+                createdAt: true,
                 like: true
             }
         })

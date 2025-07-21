@@ -13,7 +13,7 @@ blogRouter.use('/*', authMiddleware)
 
 
 
-blogRouter.get("/getBlogs/:page", async (c) => {
+blogRouter.get("/blogs/:page", async (c) => {
    try {
       if (!c.env) return c.json({ message: "Server configuration error" }, 500)
       const service = createBlogService(c.env)
@@ -58,7 +58,7 @@ blogRouter.delete('/delete/:id', async (c) => {
    }
 })
 
-blogRouter.get("/getBlog/:id", async (c) => {
+blogRouter.get("/Blog/:id", async (c) => {
    try {
       if (!c.env) return c.json({ message: "Server configuration error" }, 500)
       const service = createBlogService(c.env)

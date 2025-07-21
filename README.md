@@ -1,87 +1,112 @@
-# 📝 Blog App Backend
+# 📝 Blogify – Full Stack Blog Application
 
-A high-performance, minimalistic blog backend built using **Hono** (Cloudflare Workers), **TypeScript**, **PostgreSQL** (via Prisma), and **JWT authentication**. It follows a clean architecture approach, making the codebase highly modular, testable, and scalable.
+A performant, full-stack blogging platform powered by **Cloudflare Workers (Hono)** and **React + TypeScript**. Built with a modular architecture and modern tooling for scalability, developer efficiency, and fast performance.
 
 ---
 
 ## 🚀 Features
 
-- 🔐 JWT-based authentication (access + refresh tokens)
-- 🧾 DTOs with schema validation using Zod
-- ✍️ CRUD functionality for blog posts
-- 👤 User sign-up and sign-in
-- 🧠 Clean architecture: Controllers, Policies, Services, Repositories
-- ☁️ Deployed on Cloudflare Workers
-- 🧪 Prepared for unit & integration testing
-- 📦 Type-safe throughout with TypeScript
+### ✅ Backend (Cloudflare Workers)
+- 🔐 **JWT Authentication** (Access + Refresh tokens)
+- 🧾 **DTO Validation with Zod**
+- ✍️ **Blog CRUD** (Create, Read, Update, Delete)
+- 👤 **User Sign Up & Sign In**
+- 🧠 **Clean Architecture** (Controllers, Services, Repositories, Policies)
+- ☁️ **Deployed on Cloudflare Workers**
+- 🧪 Ready for **unit and integration testing**
+- 📦 Fully typed with **TypeScript**
+
+### 💅 Frontend (React + TailwindCSS)
+- ⚛️ Built with **React + Vite + TypeScript**
+- 🖌️ **TailwindCSS** for styling
+- 🔐 JWT-based user authentication
+- 🧑‍💻 Signup and login forms
+- ✍️ Blog post creation, listing, and deletion
+- 📱 Mobile-responsive and component-driven
+- ⚙️ Custom hooks, loader, and avatar components
 
 ---
 
 ## 🧰 Tech Stack
 
-| Tech              | Purpose                              |
-|------------------ |--------------------------------------|
-| **Hono**          | Fast web framework for Cloudflare Workers |
-| **Prisma**        | Type-safe ORM for PostgreSQL          |
-| **PostgreSQL**    | Primary relational database           |
-| **TypeScript**    | Strong typing for safer code          |
-| **Zod**           | Schema validation                     |
-| **JWT**           | Authentication                        |
-| **Wrangler**      | Cloudflare Workers tooling            |
+| Layer     | Tools |
+|-----------|-------|
+| **Frontend** | React, TypeScript, Vite, TailwindCSS, React Router |
+| **Backend**  | Hono (Cloudflare Workers), Prisma, PostgreSQL, Zod, JWT |
+| **Dev Tools** | Wrangler, dotenv, custom hooks, modular foldering |
 
 ---
 
 ## 📁 Folder Structure
 
-```bash
 .
-├── controllers/      # Handles HTTP input/output
-├── services/         # Business logic layer
-├── repositories/     # Database access layer using Prisma
-├── policies/         # Input validation (Zod-based)
-├── types/            # DTOs, custom types, interfaces
-├── lib/              # Utilities (e.g., Prisma factory)
-├── middleware/       # JWT authentication middleware
-├── routes/           # Hono-based route definitions
-└── index.ts          # App entry point
+├── backend/
+│ ├── controllers/
+│ ├── services/
+│ ├── repositories/
+│ ├── policies/
+│ ├── middleware/
+│ ├── types/
+│ ├── routes/
+│ ├── lib/
+│ ├── utils/
+│ └── index.ts
+├── frontend/
+│ ├── src/
+│ │ ├── components/
+│ │ ├── hooks/
+│ │ ├── pages/
+│ │ ├── App.tsx
+│ │ └── main.tsx
+│ └── index.html
+└── README.md
 
-```
-## 🧪 API Endpoints
-| Method | Route            | Description           | Protected  |
-| ------ | ---------------- | --------------------- | ---------- |
-| POST   | `/api/v1/signup` | Register new user     | ❌         |
-| POST   | `/api/v1/signin` | Authenticate + tokens | ❌         |
-| POST   | `/addBlog`       | Create a blog         | ✅         |
-| GET    | `/blogs`         | List all blogs        | ✅         |
-| GET    | `/blogs/:id`     | Get a blog by ID      | ✅         |
-| PUT    | `/blogs/:id`     | Update blog by ID     | ✅         |
-| DELETE | `/blogs/:id`     | Delete blog by ID     | ✅         |
+---
 
+## 🔌 Backend API Endpoints
 
-## 📦 Installation & Dev Setup
+| Method   | Route            | Description         | Auth |
+|----------|------------------|---------------------|------|
+| POST     | `/api/v1/signup` | User registration   | ❌   |
+| POST     | `/api/v1/signin` | User login          | ❌   |
+| POST     | `/addBlog`       | Create blog         | ✅   |
+| GET      | `/blogs`         | Get all blogs       | ✅   |
+| GET      | `/blogs/:id`     | Get blog by ID      | ✅   |
+| PATCH    | `/blogs/:id`     | Update blog by ID   | ✅   |
+| DELETE   | `/blogs/:id`     | Delete blog by ID   | ✅   |
 
-# 1. Install dependencies
-npm install
+---
 
-# 2. Start dev server (Cloudflare local)
-npm run dev
+## 🧪 Sample Payload (Blog Creation)
 
-# 3. Deploy to Cloudflare
-npm run deploy
-
-# 4. Generate Cloudflare bindings type support
-npm run cf-typegen
-When using cf-typegen, remember to update your app entry point:
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-
-## 🧾 Sample Payload (Create Blog)
-json
+```json
 {
-  "title": "The Future of TypeScript in Backend Development",
-  "content": "TypeScript is becoming increasingly popular for backend development due to its static typing, strong tooling support, and growing ecosystem...",
-  "thumbnail": "https://example.com/image.png",
-  "authorId": "28738226-a01b-4b3c-977e-d7b3feb37e7c"
+  "title": "Exploring Edge Computing",
+  "content": "Edge computing pushes computation closer to the user...",
+  "thumbnail": "https://example.com/thumb.png",
+  "authorId": "c0de1234-5678-abcd-9012-example"
 }
+⚙️ Getting Started
+🔧 Backend Setup
+bash
+cd backend
+npm install
+npm run dev         # Run Cloudflare Worker locally
+npm run deploy      # Deploy to Cloudflare
+npm run cf-typegen  # Optional: generate type bindings
 
-## 📄 License
-MIT — Feel free to fork, modify, or contribute.
+Update index.ts:
+const app = new Hono<{ Bindings: CloudflareBindings }>();
+
+💻 Frontend Setup
+bash
+cd frontend
+npm install
+npm run dev
+Ensure the backend is deployed and accessible or use a .env file to configure API base URLs.
+
+
+
+📜 License
+This project is licensed under the MIT License.
+
