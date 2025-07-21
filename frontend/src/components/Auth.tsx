@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from './Button'
-import axios from 'axios'
+import axios, { AxiosHeaders } from 'axios'
 import { BACKEND_URL } from '../config'
 
 import { toast } from 'sonner'
@@ -22,9 +22,13 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
 
   async function sendRequest () {
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/v1/${type == "signup" ? "signup" : "signin"}`, postInputs)
-      const jwt = response.data.accessToken
-      localStorage.setItem('token', jwt)
+      // const response = 
+      await axios.post(`${BACKEND_URL}/api/v1/${type == "signup" ? "signup" : "signin"}`, postInputs, {
+        withCredentials: true
+      })
+      // const jwt = response.data.accessToken
+      // localStorage.setItem('token', jwt)
+      
       toast.success(`${type == 'signup' ? "User created" : "Signed in"} successfully`)
       navigate('/blogs')
     } catch (error) {
