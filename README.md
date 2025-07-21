@@ -87,9 +87,8 @@ frontend/
   "thumbnail": "https://example.com/thumb.png",
   "authorId": "c0de1234-5678-abcd-9012-example"
 }
-```
 
-## ⚙️ Getting Started
+⚙️ Getting Started
 
 🔧 Backend Setup
 bash
@@ -109,7 +108,7 @@ npm install
 npm run dev
 Ensure the backend is deployed and accessible or use a .env file to configure API base URLs.
 
-
+```
 
 ## 📜 License
 This project is licensed under the MIT License.
