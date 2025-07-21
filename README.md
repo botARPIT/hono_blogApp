@@ -37,7 +37,31 @@ A performant, full-stack blogging platform powered by **Cloudflare Workers (Hono
 
 ---
 
-<pre> ### 📁 Folder Structure #### Backend ``` backend/ ├── controllers/ # Handles HTTP requests ├── services/ # Business logic ├── repositories/ # DB access (Prisma) ├── policies/ # Zod validations ├── middleware/ # JWT middleware ├── types/ # DTOs & interfaces ├── lib/ # Utilities (e.g., prisma client) ├── routes/ # Route definitions (Hono) └── index.ts # App entry ``` #### Frontend ``` frontend/ ├── components/ # Reusable UI components ├── pages/ # Route-based pages ├── hooks/ # Custom React hooks ├── App.tsx # App entry └── main.tsx # Main React DOM render ``` </pre>
+ ### 📁 Folder Structure 
+ ```bash 
+ 🖥️ Backend
+ 
+backend/
+├── controllers/      # Handles HTTP input/output
+├── services/         # Business logic layer
+├── repositories/     # Database access layer using Prisma
+├── policies/         # Input validation (Zod-based)
+├── types/            # DTOs, custom types, interfaces
+├── lib/              # Utilities (e.g., Prisma client)
+├── middleware/       # JWT authentication middleware
+├── routes/           # Hono-based route definitions
+└── index.ts          # App entry point 
+
+```bash
+🌐 Frontend 
+
+frontend/
+├── components/       # Reusable UI components
+├── pages/            # Route-level views (React Router)
+├── hooks/            # Custom React hooks
+├── App.tsx           # Main app component
+└── main.tsx          # React app entry point
+
 ---
 
 ## 🔌 Backend API Endpoints
