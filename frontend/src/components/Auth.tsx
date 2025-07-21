@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from './Button'
-import axios, { AxiosHeaders } from 'axios'
+import axios from 'axios'
 import { BACKEND_URL } from '../config'
 
 import { toast } from 'sonner'
