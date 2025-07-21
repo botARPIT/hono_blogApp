@@ -11,6 +11,6 @@ export  function generateTokens(payload: JwtPayload, ACCESS_KEY : string, REFRES
     const refreshToken = jwt.sign(payload, REFRESH_KEY, {expiresIn: "7d"})
     return {accessToken, refreshToken}
 }
-export function jwtVerify(token: string, KEY: string): JwtPayload {
-    return jwt.verify(token, KEY) as JwtPayload
+export async function jwtVerify(token: string, KEY: string): Promise<JwtPayload> {
+    return await jwt.verify(token, KEY) as JwtPayload
 }

@@ -21,10 +21,10 @@ class BlogController {
         const blogId = c.req.param('id')
         const body = await c.req.json<UpdateBlogDTO>()
         const inputValidation = blogPolicy.validateUpdateBlog(body)
-        const { id } = c.get('jwtPayload')
-        if (!blogId || !id) throw new BadRequestError("Blog or user id missing")
+        const { id: userId } = c.get('jwtPayload')
+        if (!blogId || !userId) throw new BadRequestError("Blog or user id missing")
         if (!inputValidation.success) throw new ValidationError("Invalid input")
-        const result = await this.blogService.update(inputValidation.data, blogId, id)
+        const result = await this.blogService.update(inputValidation.data, blogId, userId)
         return c.json(result)
 
     }
@@ -38,9 +38,9 @@ class BlogController {
 
     async deleteBlog(c: Context) {
         const blogId: string = c.req.param('id')
-        const { id } = c.get('jwtPayload')
-        if (!blogId || !id) throw new BadRequestError("Blog or user ID missing")
-        const result = await this.blogService.delete(blogId, id)
+        const { id: userId } = c.get('jwtPayload')
+        if (!blogId || !userId) throw new BadRequestError("Blog or user ID missing")
+        const result = await this.blogService.delete(blogId, userId)
         return c.json(result)
     }
 

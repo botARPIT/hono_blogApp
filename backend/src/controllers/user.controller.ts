@@ -4,14 +4,17 @@ import { createUserService } from "../services/user.service";
 import { userInputPolicy } from "../policies/user.policy";
 import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
 import { ZodError } from "../errors/app-error";
+import { setCookies } from "../utils/setCookies";
 
  class UserController{
     constructor(private userService : ReturnType<typeof createUserService> ){}
+
     async signup(c: Context){
         const body = await c.req.json<UserSignUpDTO>();
         const inputValidation = userInputPolicy.validateSignUp(body)
         if(!inputValidation.success) throw new ZodError("Zod validation failed")
         const result = await this.userService.signup(inputValidation.data)
+        setCookies(c, result)
         return c.json(result)
         
     }
@@ -21,6 +24,7 @@ import { ZodError } from "../errors/app-error";
         const inputValidation = userInputPolicy.validateSignIn(body)
         if(!inputValidation.success) throw new ZodError("Zod validation failed")
             const result = await this.userService.signin(inputValidation.data)
+        setCookies(c, result)
         return c.json(result)
     }
 }   
