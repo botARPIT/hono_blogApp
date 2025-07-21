@@ -40,7 +40,7 @@ A performant, full-stack blogging platform powered by **Cloudflare Workers (Hono
  ### 📁 Folder Structure 
  ```bash 
  🖥️ Backend
- 
+
 backend/
 ├── controllers/      # Handles HTTP input/output
 ├── services/         # Business logic layer
@@ -51,7 +51,7 @@ backend/
 ├── middleware/       # JWT authentication middleware
 ├── routes/           # Hono-based route definitions
 └── index.ts          # App entry point 
-
+```
 ```bash
 🌐 Frontend 
 
@@ -63,7 +63,7 @@ frontend/
 └── main.tsx          # React app entry point
 
 ---
-
+```
 ## 🔌 Backend API Endpoints
 
 | Method   | Route            | Description         | Auth |
