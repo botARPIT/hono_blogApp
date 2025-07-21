@@ -106,8 +106,8 @@ npm install
 npm run dev
 Ensure the backend is deployed and accessible or use a .env file to configure API base URLs.
 
+```
 
-
-📜 License
+## 📜 License
 This project is licensed under the MIT License.
 
