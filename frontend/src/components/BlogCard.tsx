@@ -13,7 +13,7 @@ export default function BlogCard ({
   createdAt
 }: BlogCardProps) {
   return (
-    <div className="border-b-2 border-slate-200 pb-2 mt-2">
+    <div className="border-b-2 border-slate-200 pb-2 mt-2 cursor-pointer">
       <div className='flex'>
         <div className='flex justify-center flex-col'>
           <img
@@ -32,7 +32,7 @@ export default function BlogCard ({
     
       </div>
       <div className='text-xl font-bold'>{title}</div>
-      <div className='text-md font-light'>{content.slice(0, 100) + ((content.length > 100 )? '...' : '')}</div>
+      <div className='text-md font-light'>{content.slice(0, 150) + ((content.length > 100 )? '...' : '')}</div>
       <div className='text-slate-600 text-sm font-thin pt-2'>{`${Math.ceil(content.length / 200)} min read`}</div>
       {/* <div>
         <img className="h-auto max-w-lg ms-auto" src="/docs/images/examples/image-1@2x.jpg" alt="image description" />
