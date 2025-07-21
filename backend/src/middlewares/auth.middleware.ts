@@ -45,7 +45,7 @@ export const authMiddleware = createMiddleware<{Bindings: Bindings, Variables: V
     const token = getCookie(c, "access_token")
     if(!token) return c.json({message: "Unauthorized"}, 401)
        try {
-    const payload = jwtVerify(token , c.env.JWT_ACCESS_SECRET)
+    const payload = await jwtVerify(token , c.env.JWT_ACCESS_SECRET)
     c.set("jwtPayload", payload)
     await next()
    } catch (error) {

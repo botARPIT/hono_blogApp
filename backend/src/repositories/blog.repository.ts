@@ -110,7 +110,12 @@ export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): P
                 thumbnail: true,
                 authorId: true,
                 createdAt: true,
-                like: true
+                like: true,
+                author :{
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         if(!blog) throw new NotFoundError("Blog not found")

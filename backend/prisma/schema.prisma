@@ -34,7 +34,7 @@ model Blog{
   author User @relation(fields: [authorId], references: [id])
   title String 
   content String 
-  thumbnail String 
+  thumbnail String
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
   like Int @default(0) @db.Integer

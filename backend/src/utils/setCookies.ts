@@ -7,14 +7,14 @@ function setCookies(c:Context, token: Token){
     setCookie(c, "access_token", accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'Strict',
-        maxAge: 60 * 15 
+        sameSite: 'None',
+        maxAge: 60 * 60 
     })
 
     setCookie(c, "refresh_token", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'Strict',
+        sameSite: 'None',
         maxAge: 60 * 60 * 24 * 2
     })
 }

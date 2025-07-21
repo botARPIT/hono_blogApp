@@ -58,7 +58,7 @@ blogRouter.delete('/delete/:id', async (c) => {
    }
 })
 
-blogRouter.get("/Blog/:id", async (c) => {
+blogRouter.get("/blog/:id", async (c) => {
    try {
       if (!c.env) return c.json({ message: "Server configuration error" }, 500)
       const service = createBlogService(c.env)
