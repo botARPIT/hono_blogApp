@@ -5,50 +5,76 @@ export enum ErrorCode {
     BAD_REQUEST = "BAD REQUEST",
     UNAUTHORIZED = "UNAUTHORIZED",
     NOT_FOUND = "NOT FOUND",
-    VALIDATION_ERROR = "VALIDATION ERROR",
+    VALIDATION_FAILED = "VALIDATION FAILED",
     INTERNAL_ERROR = "INTERNAL ERROR",
     ZOD_ERROR = "ZOD_ERROR",
-    PRISMA_ERROR = "PRISMA_ERROR"
- }
-export class AppError extends Error{
-   public statusCode : ContentfulStatusCode
-   public code : ErrorCode
-   public details? : unknown
-   constructor(message: string, statusCode = 500 as ContentfulStatusCode, code: ErrorCode = ErrorCode.INTERNAL_ERROR, details?: unknown){
-    super(message)
-    this.statusCode = statusCode,
-    this.code = code 
-    this.details = details
-    Object.setPrototypeOf(this, AppError.prototype) //Ensures AppError instance of Error == true
-   }
+    DB_ERROR = "DB_ERROR"
 }
 
-export class ValidationError extends AppError{
-    constructor(message: string, details?: unknown){
-        super(message, 400, ErrorCode.BAD_REQUEST, details)
+export enum SeverityLevel {
+    CRITICAL = "CRITICAL",
+    LOW = "LOW",
+    MEDIUM = "MEDIUM",
+    HIGH = "HIGH"
+}
+
+export enum ServiceName {
+    BUSINESS = "BUSINESS",
+    DB = "DB",
+    CONTROLLER = "CONTROLLER",
+    ROUTER = "ROUTER",
+    MIDDLEWARE = "MIDDLEWARE"
+}
+
+export class AppError extends Error {
+    public readonly statusCode: ContentfulStatusCode
+    public readonly errorCode: ErrorCode
+    public readonly meta?: Record<string, any>
+    public readonly timestamp: number
+    public readonly severityLevel?: SeverityLevel
+    public readonly serviceName?: ServiceName
+    public readonly isOperational: boolean
+    constructor(message: string, statusCode = 500 as ContentfulStatusCode, errorCode: ErrorCode = ErrorCode.INTERNAL_ERROR, isOperational: boolean, timestamp = Date.now(), severityLevel: SeverityLevel = SeverityLevel.LOW, meta?: Record<string, any> , serviceName?: ServiceName) {
+        super(message)
+        Error.captureStackTrace(this, this.constructor)
+        this.statusCode = statusCode;
+        this.errorCode = errorCode;
+        this.meta = meta;
+        this.severityLevel = severityLevel;
+        this.serviceName = serviceName;
+        this.timestamp = timestamp;
+        this.isOperational = isOperational
+        
+        Object.setPrototypeOf(this, AppError.prototype) //Ensures AppError instance of Error == true
     }
 }
 
-export class NotFoundError extends AppError{
-    constructor(message: string){
-        super(message, 404, ErrorCode.NOT_FOUND)
+export class ValidationError extends AppError {
+    constructor(message : string = "Validation Failed", meta?: Record<string, any>) {
+        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(),  SeverityLevel.LOW, meta, ServiceName.CONTROLLER)
     }
 }
 
-export class UnauthorizedError extends AppError{
-    constructor(message: string,){
-        super(message, 401, ErrorCode.UNAUTHORIZED)
+export class NotFoundError extends AppError {
+    constructor(message: string = "Resource not found", meta: Record<string, any> = {reason : "Resource does not exist"}) {
+        super(message, 404, ErrorCode.NOT_FOUND, false, Date.now(), SeverityLevel.LOW, meta, ServiceName.DB)
     }
 }
 
-export class BadRequestError extends AppError{
-    constructor(message: string){
-        super(message, 400, ErrorCode.BAD_REQUEST)
+export class UnauthorizedError extends AppError {
+    constructor(message: string = "Unauthorized access to the resource", meta: Record<string, any> = {reason : "Verify your identity"} ) {
+        super(message, 401, ErrorCode.UNAUTHORIZED, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.MIDDLEWARE)
     }
 }
 
-export class ZodError extends AppError{
-    constructor(message: string){
-        super(message, 400, ErrorCode.ZOD_ERROR)
+export class BadRequestError extends AppError {
+    constructor(message: string = "Bad Request", meta: Record<string, any> = {reason : "You dont have enough access permission"}) {
+        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.ROUTER)
+    }
+}
+
+export class ZodValidationError extends AppError {
+    constructor(message: string = "Zod validation error", meta: Record<string, any> = {reason: "Incorrect username / password" }) {
+        super(message, 400, ErrorCode.ZOD_ERROR, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.CONTROLLER)
     }
 }
