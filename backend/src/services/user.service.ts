@@ -4,7 +4,7 @@ import { createUser, findUniqueUser } from "../repositories/user.repository";
 
 import { Bindings } from "../types/binding.types";
 import { generateAccessToken, generateTokens } from "../utils/jwt";
-import { AppError, BadRequestError, ErrorCode, ValidationError } from "../errors/app-error";
+import { AppError, BadRequestError, ErrorCode, NotFoundError, ServiceName, SeverityLevel, ValidationError } from "../errors/app-error";
 import { Token } from "../types/jwt.types";
 
 
@@ -17,7 +17,7 @@ class UserService {
     try {
       const hashedPass = await createHash(dto.password)
       console.log(hashedPass)
-      if (!hashedPass) throw new AppError("Hashing failed")
+      if (!hashedPass) throw new AppError("Hashing service failed", 500, ErrorCode.INTERNAL_ERROR, false,  Date.now(), SeverityLevel.CRITICAL, {message: "Enter the password again"}, ServiceName.BUSINESS)
       const userCreated = await createUser(dto.name, dto.email, hashedPass, this.env.DATABASE_URL)
       const {id, name} = userCreated
       const payload = {id, name}
@@ -25,7 +25,7 @@ class UserService {
      return token
 
     } catch (error) {
-      throw new BadRequestError("User already exists")
+      throw new BadRequestError("User already exists",ServiceName.BUSINESS, {message: "Try signin in"})
     }
   }
 
@@ -36,11 +36,11 @@ class UserService {
       // const t1 = performance.now()
       // console.log("From user service: ", t1 - t0)
       if (!user) {
-        throw new BadRequestError("User not found")
+        throw new BadRequestError("User not found", ServiceName.BUSINESS, {message: "Try with your registered credentials"})
       }
       const hasValidPass = await compareHash(dto.password, user.password)
       if (!hasValidPass) {
-        throw new ValidationError("Invalid pass")
+        throw new ValidationError("Password does not match", ServiceName.BUSINESS, {message: "Enter correct password"})
       }
       const {id, name} = user
       const payload = {id, name}
@@ -48,7 +48,7 @@ class UserService {
       return { accessToken: accessToken, refreshToken: refreshToken }
 
     } catch (error) {
-     throw new BadRequestError("User does not exist")
+     throw new NotFoundError("User does not exist", {message: "First register the user"})
     }
   }
 }

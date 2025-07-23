@@ -1,4 +1,5 @@
 
+
 import { ContentfulStatusCode } from "hono/utils/http-status"
 
 export enum ErrorCode {
@@ -50,8 +51,8 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-    constructor(message : string = "Validation Failed", meta?: Record<string, any>) {
-        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(),  SeverityLevel.LOW, meta, ServiceName.CONTROLLER)
+    constructor(message : string = "Validation Failed", serviceName: ServiceName, meta?: Record<string, any>, ) {
+        super(message, 400, ErrorCode.VALIDATION_FAILED, true, Date.now(),  SeverityLevel.LOW, meta , serviceName )
     }
 }
 
@@ -62,19 +63,25 @@ export class NotFoundError extends AppError {
 }
 
 export class UnauthorizedError extends AppError {
-    constructor(message: string = "Unauthorized access to the resource", meta: Record<string, any> = {reason : "Verify your identity"} ) {
+    constructor(message: string = "Unauthorized access to the resource", meta: Record<string, any> = {reason : "You don't have necessary permissions"} ) {
         super(message, 401, ErrorCode.UNAUTHORIZED, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.MIDDLEWARE)
     }
 }
 
 export class BadRequestError extends AppError {
-    constructor(message: string = "Bad Request", meta: Record<string, any> = {reason : "You dont have enough access permission"}) {
-        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.ROUTER)
+    constructor(message: string = "Bad Request", serviceName: ServiceName ,meta?: Record<string, any> ) {
+        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(), SeverityLevel.LOW, meta,  serviceName )
     }
 }
 
 export class ZodValidationError extends AppError {
-    constructor(message: string = "Zod validation error", meta: Record<string, any> = {reason: "Incorrect username / password" }) {
+    constructor(message: string = "Zod validation error", meta: Record<string, any>) {
         super(message, 400, ErrorCode.ZOD_ERROR, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.CONTROLLER)
+    }
+}
+
+export class DBError extends AppError {
+    constructor(message: string , meta: Record<string, any>) {
+        super(message, 400, ErrorCode.DB_ERROR, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.DB)
     }
 }

@@ -1,6 +1,6 @@
 
 import {z} from "zod";
-import { Token } from "./jwt.types";
+
 
 export const userSignUpSchema = z.object({
     name: z.string().toLowerCase().trim(),

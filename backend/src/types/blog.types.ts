@@ -13,7 +13,7 @@ export type BlogDTO = {
 }
 
 
-export type AddBlogDTO = Pick<BlogDTO, 'title'  |'content'| 'thumbnail' | 'authorId'>
+export type AddBlogDTO = Pick<BlogDTO, 'title'  |'content'| 'thumbnail'>
 export type CreatedBlogDTO = Omit<BlogDTO, 'updatedAt' | 'published' | 'like'>
 export type UpdateBlogDTO = Partial<Pick<BlogDTO, 'title' | 'content' | 'thumbnail'>>
 export type GetBlogDTO = Omit<BlogDTO, 'updatedAt' | 'published'>
@@ -24,7 +24,7 @@ export const blogSchema = z.object({
     title: z.string().min(10, {message: "Title too short"}).max(100, {message: "Title cannot exceed 100 characters"}).trim(),
     content: z.string().min(150, {message: "Add more content"}).max(2000, {message: "Content cannot exceed 2000 characters"}).trim(),
     thumbnail: z.string().trim(),
-    authorId: z.string().trim()
+    authorId: z.string().trim().optional()
 })
 
 export const updateBlogSchema = z.object({

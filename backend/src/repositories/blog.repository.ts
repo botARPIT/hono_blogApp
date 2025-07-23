@@ -1,20 +1,25 @@
+import {  ServiceName } from './../errors/app-error';
 
-import { AppError, ErrorCode, NotFoundError } from "../errors/app-error";
+import { NotFoundError, ValidationError } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
 import { Bindings } from "../types/binding.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
+import { prismaErrorObject, prismaErrorWrapper } from '../utils/prismaErrorWrapper';
 
 
 
-export async function createBlog(dto: AddBlogDTO, dbUrl: Bindings["DATABASE_URL"]): Promise<CreatedBlogDTO> {
-    const prisma = getPrismaClient(dbUrl)
+
+export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<CreatedBlogDTO> {
+
     try {
+        if (!userId || !dto.content || !dto.thumbnail || !dto.title) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "All required fields" })
+        const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.create({
             data: {
                 title: dto.title,
                 content: dto.content,
                 thumbnail: dto.thumbnail,
-                authorId: dto.authorId
+                authorId: userId
             },
             select: {
                 id: true,
@@ -29,12 +34,14 @@ export async function createBlog(dto: AddBlogDTO, dbUrl: Bindings["DATABASE_URL"
 
         return blog
     } catch (error) {
-        throw new AppError("Cannot create blog", 500, ErrorCode.PRISMA_ERROR, error)
+        console.log(error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
-export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId :string, dbUrl: Bindings["DATABASE_URL"]): Promise<UpdateBlogDTO> {
+export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<UpdateBlogDTO> {
     try {
+        if (!dto.content && !dto.thumbnail && !dto.title) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "At least one field is required" })
         const prisma = getPrismaClient(dbUrl)
 
         const updateData = Object.fromEntries(Object.entries(dto).filter(([_, v]) => v !== undefined))
@@ -47,12 +54,14 @@ export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId :s
         })
         return updatedBlog
     } catch (error) {
-       throw new AppError("Cannot update blog", 500, ErrorCode.PRISMA_ERROR, error)
+        console.log(error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
 export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO[]> {
     try {
+        { !page ? page = 1 : page }
         const prisma = getPrismaClient(dbUrl)
         const allBlogs = await prisma.blog.findMany({
             orderBy: { updatedAt: 'desc' },
@@ -75,14 +84,16 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
         })
 
         return allBlogs
-        
+
     } catch (error) {
-        throw new AppError("Failed to get blogs", 500, ErrorCode.PRISMA_ERROR, error)
+          console.log(error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
 export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<DeletedBlogDTO> {
     try {
+        if (!id || !authorId) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "All required fields" })
         const prisma = getPrismaClient(dbUrl)
         const deletedBlog = await prisma.blog.delete({
             where: {
@@ -92,18 +103,20 @@ export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["
         })
         return deletedBlog
     } catch (error: unknown) {
-       throw new AppError("Failed to delete blog", 500, ErrorCode.PRISMA_ERROR, error)
+          console.log(error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
-export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO> {
+export async function getBlogById(id: string, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO> {
     try {
+        if (!id) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "Id is required" })
         const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.findUnique({
             where: {
                 id
-            }, 
-             select: {
+            },
+            select: {
                 id: true,
                 title: true,
                 content: true,
@@ -111,16 +124,17 @@ export async function getBlogById(id:string, dbUrl: Bindings["DATABASE_URL"]): P
                 authorId: true,
                 createdAt: true,
                 like: true,
-                author :{
+                author: {
                     select: {
                         name: true
                     }
                 }
             }
         })
-        if(!blog) throw new NotFoundError("Blog not found")
+        if (!blog) throw new NotFoundError("Blog not found")
         return blog
     } catch (error) {
-          throw new AppError("Cannot find the blog", 500, ErrorCode.PRISMA_ERROR, error)
+          console.log(error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }

@@ -4,8 +4,8 @@ import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO }
 
 class BlogService {
     constructor(private env : Bindings) {}
-    async addBlog(dto: AddBlogDTO): Promise<CreatedBlogDTO>{
-       return await createBlog(dto, this.env.DATABASE_URL)
+    async addBlog(dto: AddBlogDTO, userId: string): Promise<CreatedBlogDTO>{
+       return await createBlog(dto, userId, this.env.DATABASE_URL)
          
     }
 
