@@ -4,12 +4,15 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-07-07",
   "compatibility_flags": [
-    "nodejs_compat"
+    "nodejs_compat", "nodejs_compat_populate_process_env"
   ],
   "vars": {
    "DATABASE_URL":"prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19ESExIUzdLeUZSM3RjelE4YUx1T3MiLCJhcGlfa2V5IjoiMDFLMEdXU0NIQ1FHSDVONDQzQVJaQUFaSjAiLCJ0ZW5hbnRfaWQiOiIzMTYzMjVhOTg0MDNhNzM5NDU4ZjlmZjA2YTFkYThkZGFjOTVlZGRiYmNjMDg3NzUwZmM2ZjU4ZWU5OTNhODM2IiwiaW50ZXJuYWxfc2VjcmV0IjoiMjcxZWQ0MGYtZWE1OC00NmYxLTg4MTMtYTM4NTM1NzQzNDUwIn0.wEfU_Wd6aQlcBEwelQuR_L_h2_k3TGHJpOZa9x329-c",
    "JWT_ACCESS_SECRET":"This is a secret",
-   "JWT_REFRESH_SECRET":"Refresh secret"
+   "JWT_REFRESH_SECRET":"Refresh secret",
+   "SUPABASE_URL" : "https://rreymtgxoiszdwpdlhup.supabase.co",
+   "SUPABASE_SERVICE_ROLE_KEY" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZXltdGd4b2lzemR3cGRsaHVwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzM1NDM2OCwiZXhwIjoyMDY4OTMwMzY4fQ.MPMprlnvwOsinW071XQTSJViq45YQw7l28Erlz16tIM",
+   "SUPABASE_BUCKET_NAME" : "blog-thumbnail"
   },
   // "kv_namespaces": [
   //   {

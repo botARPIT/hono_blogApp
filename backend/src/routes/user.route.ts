@@ -10,6 +10,8 @@ import { Bindings } from '../types/binding.types';
 import createController from "../controllers/user.controller";
 import { AppError } from "../errors/app-error";
 import { handleError } from "../errors/handle-error";
+import { getStorageInfo, getSupabaseClient, uploadFile } from "../repositories/blog.thumbnail.repository";
+import { getKey } from "../utils/getEnvVariables";
 
 
 const userRouter = new Hono<{ Bindings: Bindings }>();
@@ -18,6 +20,8 @@ userRouter.post('/signup', async (c) => {
    try {
       // const dbUrl = c.env.DATABASE_URL;
       if (!c.env) return c.json({ message: "Server configuration error" }, 503)
+
+  
       const userService = createUserService(c.env)
       const controller = createController(userService)
       return await controller.signup(c)

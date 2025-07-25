@@ -8,8 +8,10 @@
   "dependencies": {
     "@prisma/client": "^6.11.1",
     "@prisma/extension-accelerate": "^2.0.2",
+    "@supabase/supabase-js": "^2.52.1",
     "@types/jsonwebtoken": "^9.0.10",
     "argon2-browser": "^1.18.0",
+    "base64-arraybuffer": "^1.0.2",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.0",
     "hono": "^4.8.5",
