@@ -22,20 +22,22 @@ export const Publish = () => {
         <button
           onClick={async () => {
             try {
-              if (!title.trim() || !content.trim()) {
-                toast.error('Title and content are required')
-                return
-              }
+              // if (!title.trim() || !content.trim()) {
+              //   toast.error('Title and content are required')
+              //   return
+              // }
+              console.log(title)
+              console.log(content)
               const response = await axios.post(
                 `${BACKEND_URL}/api/v1/addBlog`,
                 {
                   title,
                   content,
-                  authorId: "9c5a4f9a-4738-44b3-b5c1-a33666a1adcd",
                   thumbnail: "url.com"
                 },
                 { withCredentials: true }
               )
+              console.log(response)
               toast.success('Blog added')
               navigate(`/blog/${response.data.id}`)
             } catch (error) {

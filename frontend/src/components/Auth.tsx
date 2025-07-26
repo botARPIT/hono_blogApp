@@ -22,7 +22,7 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
 
   async function sendRequest () {
     try {
-      // const response = 
+     
       await axios.post(`${BACKEND_URL}/api/v1/${type == "signup" ? "signup" : "signin"}`, postInputs, {
         withCredentials: true
       })

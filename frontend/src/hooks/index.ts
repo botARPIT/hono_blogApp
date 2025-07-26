@@ -2,6 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { BACKEND_URL } from "../config"
 import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
 
 
 export type BlogDTO = {
@@ -40,7 +41,8 @@ export const useBlog = ({ id }: { id: string }) => {
 export const useBlogs = () => {
     const [loading, setLoading] = useState(true)
     const [blogs, setBlogs] = useState<BlogDTO[]>([])
-
+    const navigate = useNavigate()
+ 
     useEffect(() => {
         try {
             axios.get(`${BACKEND_URL}/api/v1/blogs/1`, {
@@ -50,8 +52,11 @@ export const useBlogs = () => {
                 withCredentials: true
             })
                 .then(response => {
-                    setBlogs(response.data);
+                    if(response.status == 401) {
+                       navigate('/signin')
+                    } else  setBlogs(response.data);
                     setLoading(false)
+                    
                 })
         } catch (error) {
             toast.error("Cannot get blogs")
