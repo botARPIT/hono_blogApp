@@ -1,15 +1,15 @@
 
 import { Hono } from 'hono';
-import { Bindings } from '../types/binding.types';
+import { Bindings } from '../types/env.types';
 import { createBlogService } from '../services/blog.service';
 import { createBlogController } from '../controllers/blog.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { handleError } from '../errors/handle-error';
-import { getStorageInfo, uploadFile } from '../repositories/blog.thumbnail.repository';
+
 
 const blogRouter = new Hono<{ Bindings: Bindings,}>()
 
-// blogRouter.use('/*', authMiddleware)
+blogRouter.use('/*', authMiddleware)
 
 
 
@@ -70,14 +70,17 @@ blogRouter.get("/blog/:id", async (c) => {
    }
 })
 
-blogRouter.post("/uploadImage", async (c) => {
-   const data = await c.req.formData()
-   const file = data.get('file') as File
-   const userId = "123"
-  await  getStorageInfo()
-   const result = await uploadFile(file, userId)
-   console.log(result)
+// blogRouter.post("/uploadImage", async (c) => {
+//    console.log("request received")
+//    const base64 = await c.req.text()
+//    const image = base64.split(',')[1]
+ 
+//    const userId = "123"
+//   await  getStorageInfo()
+//    const result = await uploadFile(image, userId)
+//    console.log("This is result", result)
+//    return c.json({result })
 
-})
+// })
 
 export { blogRouter }

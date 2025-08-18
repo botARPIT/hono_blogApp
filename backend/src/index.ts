@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import mainRouter from './routes/router'
+import mainRouter from './routes'
 
 
 

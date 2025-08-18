@@ -1,6 +1,6 @@
 // Duck typed workaround solution for error handling since cloudflare workers dont have direct access to prisma error instances
 
-import { DBError } from "../errors/app-error"
+import { DBError } from "./app-error"
 
 export type prismaErrorObject = {
     code? : string | null,

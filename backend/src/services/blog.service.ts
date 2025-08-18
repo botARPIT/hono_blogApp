@@ -1,9 +1,9 @@
 import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog } from "../repositories/blog.repository";
-import { Bindings } from "../types/binding.types";
+import { Bindings, EnvironmentVariables } from "../types/env.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 
 class BlogService {
-    constructor(private env : Bindings) {}
+    constructor(private env : EnvironmentVariables) {}
     async addBlog(dto: AddBlogDTO, userId: string): Promise<CreatedBlogDTO>{
        return await createBlog(dto, userId, this.env.DATABASE_URL)
          

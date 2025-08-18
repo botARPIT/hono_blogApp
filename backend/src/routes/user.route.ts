@@ -1,17 +1,16 @@
 
 import { Hono } from "hono";
-import { setCookie } from "hono/cookie"
+import { deleteCookie, setCookie } from "hono/cookie"
 import { createUserService } from "../services/user.service";
 import { generateAccessToken,  jwtVerify } from "../utils/jwt";
 
 import 'dotenv/config'
 
-import { Bindings } from '../types/binding.types';
+import { Bindings } from '../types/env.types';
 import createController from "../controllers/user.controller";
-import { AppError } from "../errors/app-error";
 import { handleError } from "../errors/handle-error";
-import { getStorageInfo, getSupabaseClient, uploadFile } from "../repositories/blog.thumbnail.repository";
-import { getKey } from "../utils/getEnvVariables";
+
+
 
 
 const userRouter = new Hono<{ Bindings: Bindings }>();
@@ -42,7 +41,20 @@ userRouter.post('/signin', async (c) => {
   } catch (error) {
   return handleError(c, error)
   }
- 
+ })
+
+ userRouter.post("/logout", async(c) => {
+   try {
+     deleteCookie(c, 'access_token', {
+      secure: true,
+      sameSite: 'None',
+      httpOnly: true
+     })
+     return c.json({message: "User logged out"})
+   } catch (error) {
+      return handleError(c, error)
+   }
+ })
    // const { email, password } = await c.req.json<UserSignInDTO>()
 
    // const registedUser = await signin(dbUrl, { email, password })
@@ -65,7 +77,7 @@ userRouter.post('/signin', async (c) => {
    //    console.log("User not found")
    // }
 
-})
+
 
 // userRouter.get("/getUser", async (c) => {
 //    try {

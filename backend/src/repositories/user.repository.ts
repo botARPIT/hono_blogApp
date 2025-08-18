@@ -1,16 +1,18 @@
 
 import { AppError, BadRequestError, ErrorCode, ServiceName } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
-import { prismaErrorObject, prismaErrorWrapper } from "../utils/prismaErrorWrapper";
+import { AuthProvider } from "../types/user.types";
+import { prismaErrorObject, prismaErrorWrapper } from "../errors/prismaErrorWrapper";
 
-export async function createUser(name: string, email: string, password: string, dbUrl: string) {
+export async function createUser(name: string, email: string, password: string | null, dbUrl: string, authProvider: AuthProvider.LOCAL | AuthProvider.GOOGLE) {
     const prisma = getPrismaClient(dbUrl)
     try {
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
-                password
+                password,
+                providerId: authProvider
             }, 
             select: {
                 id: true,
@@ -19,7 +21,6 @@ export async function createUser(name: string, email: string, password: string, 
                 createdAt: true
             }
         })
-        if(!user) throw new BadRequestError("User already exists", ServiceName.DB, {message: "Kindly login"})
          return user 
     } catch (error) {
          console.log(error)
@@ -37,11 +38,11 @@ export async function findUniqueUser(email: string, dbUrl: string) {
             select: {
                 id: true,
                 name: true,
-                password: true
+                password: true,
+                providerId: true
             }
         })
-        if(!user) throw new BadRequestError("User does not exist", ServiceName.DB, {message: "Register your email first"})
-        else return user 
+        return user 
     } catch (error) {
         console.log(error)
         throw prismaErrorWrapper(error as prismaErrorObject)

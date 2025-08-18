@@ -1,6 +1,6 @@
 export type JwtPayload = {
     id : string,
-    name: string,
+    name?: string,
     role? : string
 }
 export type Token = { accessToken: string, refreshToken: string }

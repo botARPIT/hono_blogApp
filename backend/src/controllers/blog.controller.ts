@@ -11,10 +11,9 @@ class BlogController {
 
     async addBlog(c: Context) {
         const body = await c.req.json<AddBlogDTO>()
-        console.log("blog body", body)
         const inputValidation = blogPolicy.validateAddBlog(body)
-        console.log("validation", inputValidation)
         const {id: userId} = c.get("jwtPayload")
+        console.log("from blog controller", userId)
         if (!inputValidation.success) throw new ValidationError("Invalid input", ServiceName.CONTROLLER, {message: "Kindly provide input in all fields"})
         const result = await this.blogService.addBlog(inputValidation.data, userId)
         return c.json(result)
@@ -22,7 +21,7 @@ class BlogController {
 
     async updateBlog(c: Context) {
         const blogId = c.req.param('id')
-        const body = await c.req.json<UpdateBlogDTO>()
+        const body = await c.req.json<UpdateBlogDTO>()  
         const inputValidation = blogPolicy.validateUpdateBlog(body)
         const { id: userId } = c.get('jwtPayload')
         if (!blogId || !userId) throw new BadRequestError("Blog or user id missing",ServiceName.CONTROLLER, {message: "Retry with correct user/blog id"})

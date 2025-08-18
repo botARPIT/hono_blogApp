@@ -58,7 +58,7 @@ export class ValidationError extends AppError {
 
 export class NotFoundError extends AppError {
     constructor(message: string = "Resource not found", meta: Record<string, any> = {reason : "Resource does not exist"}) {
-        super(message, 404, ErrorCode.NOT_FOUND, false, Date.now(), SeverityLevel.LOW, meta, ServiceName.DB)
+        super(message, 404, ErrorCode.NOT_FOUND, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.BUSINESS)
     }
 }
 

@@ -2,9 +2,9 @@ import {  ServiceName } from './../errors/app-error';
 
 import { NotFoundError, ValidationError } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
-import { Bindings } from "../types/binding.types";
+import { Bindings } from "../types/env.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
-import { prismaErrorObject, prismaErrorWrapper } from '../utils/prismaErrorWrapper';
+import { prismaErrorObject, prismaErrorWrapper } from '../errors/prismaErrorWrapper';
 
 
 
@@ -12,6 +12,7 @@ import { prismaErrorObject, prismaErrorWrapper } from '../utils/prismaErrorWrapp
 export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<CreatedBlogDTO> {
 
     try {
+        console.log("From repo", userId)
         if (!userId || !dto.content || !dto.thumbnail || !dto.title) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "All required fields" })
         const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.create({
