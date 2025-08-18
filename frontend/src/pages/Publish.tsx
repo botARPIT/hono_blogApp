@@ -20,16 +20,17 @@ export const Publish = () => {
       </div>
       <div className='flex justify-center'>
         <button
-          onClick={async () => {
+          onClick={async (e) => {
             try {
               // if (!title.trim() || !content.trim()) {
               //   toast.error('Title and content are required')
               //   return
               // }
+              e.preventDefault()
               console.log(title)
               console.log(content)
               const response = await axios.post(
-                `${BACKEND_URL}/api/v1/addBlog`,
+                `${BACKEND_URL}/api/v1/blog/addBlog`,
                 {
                   title,
                   content,

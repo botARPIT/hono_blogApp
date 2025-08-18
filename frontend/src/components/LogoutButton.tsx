@@ -6,7 +6,8 @@ export const LogoutButton = () => {
 const navigate = useNavigate()
     async function handleLogout (){
     try {
-        await axios.post(`${BACKEND_URL}/api/v1/logout`, {}, {withCredentials: true}) 
+        const response = await axios.post(`${BACKEND_URL}/api/v1/user/logout`, {}, {withCredentials: true}) 
+        console.log(response)
          navigate('/signin')
     } catch (error) {
         console.log(error)
@@ -20,7 +21,7 @@ const navigate = useNavigate()
         className='text-white cursor-pointer     bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-lg rounded-full text-sm p-3 text-center inline-flex items-center mb-0.5'
       >
         <svg
-          className='w-4 h-4'
+          className='w-4 h-4' 
           aria-hidden='true'
           xmlns='http://www.w3.org/2000/svg'
           fill='none'

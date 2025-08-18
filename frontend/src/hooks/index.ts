@@ -21,7 +21,7 @@ export const useBlog = ({ id }: { id: string }) => {
 
     useEffect(() => {
         try {
-            axios.get(`${BACKEND_URL}/api/v1/blog/${id}`, {
+            axios.get(`${BACKEND_URL}/api/v1/blog/blog/${id}`, {
                 withCredentials: true
             }).then(response => {
                 setBlog(response.data)
@@ -45,7 +45,7 @@ export const useBlogs = () => {
  
     useEffect(() => {
         try {
-            axios.get(`${BACKEND_URL}/api/v1/blogs/1`, {
+            axios.get(`${BACKEND_URL}/api/v1/blog/blogs/1`, {
                 // headers: {
                 //     Authorization: `Bearer ${localStorage.getItem("token")}`
                 // }
@@ -60,6 +60,7 @@ export const useBlogs = () => {
                 })
         } catch (error) {
             toast.error("Cannot get blogs")
+            navigate('/signin')
         }
     }, [])
 

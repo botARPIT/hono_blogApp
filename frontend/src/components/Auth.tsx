@@ -5,6 +5,7 @@ import axios from 'axios'
 import { BACKEND_URL } from '../config'
 
 import { toast } from 'sonner'
+import { Login } from './Login'
 type UserAuthDTO = {
   name?: string
   email: string
@@ -92,6 +93,7 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
             />
 
             <Button label={type === 'signup' ? 'Sign up' : 'Sign in'} submit={sendRequest}/>
+            <Login label={type === 'signup'? 'Sign up': 'Sign in'}/>
           </div>
         </div>
       </div>
