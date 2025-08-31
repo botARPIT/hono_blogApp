@@ -87,12 +87,23 @@ async function compareHash(password: string, storedHash: string): Promise<Boolea
     )
     const derivedHash = new Uint8Array(derivedHashBuffer)
     //Converting derived hash buffer to hash
-    const hash = Array.from(derivedHash)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('')
+    // const hash = Array.from(derivedHash)
+    //     .map(b => b.toString(16).padStart(2, '0'))
+    //     .join('')
 
-        if(hexedHash === hash) return true
-        return false
+    return compareHashInNoTime(derivedHash, hashBytes)
+
+}
+
+function compareHashInNoTime(a: Uint8Array, b: Uint8Array): boolean{
+    //This is to prevent leaky time attack
+    if(a.length != b.length) return false
+    let numberOfDifferences = 0
+    for(let i = 0; i < a.length; i++){
+        numberOfDifferences |= a[i] ^ b[i]
+    }
+    return numberOfDifferences === 0
+
 }
 
 export {hashPassword, compareHash}
