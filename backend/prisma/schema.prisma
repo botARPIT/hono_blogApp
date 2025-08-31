@@ -41,7 +41,7 @@ model Blog{
   like Int @default(0) @db.Integer
   published Boolean @default(false)
 
-  @@index([authorId])
+  @@index([id, authorId])
 	@@map("Blog")
 }
 

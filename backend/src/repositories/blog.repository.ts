@@ -12,8 +12,7 @@ import { prismaErrorObject, prismaErrorWrapper } from '../errors/prismaErrorWrap
 export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<CreatedBlogDTO> {
 
     try {
-        console.log("From repo", userId)
-        if (!userId || !dto.content || !dto.thumbnail || !dto.title) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "All required fields" })
+        const start = performance.now()
         const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.create({
             data: {
@@ -32,7 +31,7 @@ export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Binding
                 published: true
             }
         })
-
+        console.log("Time to create blog", performance.now() - start)
         return blog
     } catch (error) {
         console.log(error)
@@ -42,7 +41,7 @@ export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Binding
 
 export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<UpdateBlogDTO> {
     try {
-        if (!dto.content && !dto.thumbnail && !dto.title) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "At least one field is required" })
+       
         const prisma = getPrismaClient(dbUrl)
 
         const updateData = Object.fromEntries(Object.entries(dto).filter(([_, v]) => v !== undefined))
@@ -62,6 +61,7 @@ export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: s
 
 export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO[]> {
     try {
+        const start = performance.now()
         { !page ? page = 1 : page }
         const prisma = getPrismaClient(dbUrl)
         const allBlogs = await prisma.blog.findMany({
@@ -81,9 +81,13 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
                         name: true
                     }
                 }
+            },
+            cacheStrategy: {
+                ttl: 300,
+                tags: [`blogs_page_${page}`, 'all_blogs']
             }
         })
-
+        console.log("Time to get all blogs", performance.now() - start)
         return allBlogs
 
     } catch (error) {
@@ -92,9 +96,51 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
     }
 }
 
+// export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO[]> {
+//     console.log("🚀 getAllBlogs called, page:", page);
+    
+//     const totalStart = performance.now();
+//     const clientStart = performance.now();
+    
+//     try {
+//         const prisma = getPrismaClient(dbUrl);
+//         console.log("⏱️ Client acquisition:", performance.now() - clientStart, "ms");
+        
+//         const queryStart = performance.now();
+//         const allBlogs = await prisma.blog.findMany({
+//             orderBy: { updatedAt: 'desc' },
+//             skip: (page - 1) * 10,
+//             take: 10,
+//             select: {
+//                 id: true,
+//                 title: true,
+//                 content: true,
+//                 thumbnail: true,
+//                 authorId: true,
+//                 createdAt: true,
+//                 like: true,
+//                 author: { select: { name: true } }
+//             },
+//             cacheStrategy: {
+//                 ttl: 300,
+//                 tags: [`blogs-page-${page}`, 'all-blogs']
+//             }
+            
+//         });
+        
+//         console.log("⏱️ Query execution:", performance.now() - queryStart, "ms");
+//         console.log("⏱️ Total time:", performance.now() - totalStart, "ms");
+//         console.log("📊 Returned blogs:", allBlogs.length);
+        
+//         return allBlogs;
+//     } catch (error) {
+//         console.log("❌ Error after:", performance.now() - totalStart, "ms");
+//         console.log(error);
+//         throw prismaErrorWrapper(error as prismaErrorObject);
+//     }
+// }
 export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<DeletedBlogDTO> {
     try {
-        if (!id || !authorId) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "All required fields" })
         const prisma = getPrismaClient(dbUrl)
         const deletedBlog = await prisma.blog.delete({
             where: {
@@ -111,7 +157,7 @@ export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["
 
 export async function getBlogById(id: string, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO> {
     try {
-        if (!id) throw new ValidationError("Missing input fields", ServiceName.DB, { message: "Id is required" })
+        const start = performance.now()
         const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.findUnique({
             where: {
@@ -130,9 +176,15 @@ export async function getBlogById(id: string, dbUrl: Bindings["DATABASE_URL"]): 
                         name: true
                     }
                 }
+            },
+    
+            cacheStrategy: {
+                ttl: 600, 
+                tags: [`single_blog`]
             }
         })
         if (!blog) throw new NotFoundError("Blog not found")
+              console.log("Time to get a single blog", performance.now() - start)
         return blog
     } catch (error) {
           console.log(error)

@@ -6,6 +6,7 @@ class BlogService {
     constructor(private env : EnvironmentVariables) {}
     async addBlog(dto: AddBlogDTO, userId: string): Promise<CreatedBlogDTO>{
        return await createBlog(dto, userId, this.env.DATABASE_URL)
+
          
     }
 

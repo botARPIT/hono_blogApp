@@ -13,7 +13,6 @@ function createPrismaClient(dbUrl: string) {
 export function getPrismaClient(dbUrl: string) {
   if (!prisma) {
     prisma = createPrismaClient(dbUrl);
-  } else 
-   prisma.$connect().catch(console.error);
+  }
   return prisma;
 }

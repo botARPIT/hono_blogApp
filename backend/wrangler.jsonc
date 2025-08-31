@@ -16,6 +16,10 @@
    "GOOGLE_CLIENT_SECRET": "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"
 
   },
+
+  "placement": {
+      "mode" : "smart"  
+    },
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",
@@ -38,8 +42,8 @@
   // "ai": {
   //   "binding": "AI"
   // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+  "observability": {
+    "enabled": true,
+    // "head_sampling_rate": 1
+  }
 }

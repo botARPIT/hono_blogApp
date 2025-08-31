@@ -9,6 +9,8 @@ import 'dotenv/config'
 import { Bindings } from '../types/env.types';
 import createController from "../controllers/user.controller";
 import { handleError } from "../errors/handle-error";
+import { createHash, webCrypto } from "../utils/hash";
+import {hashPassword} from "../utils/hashUsingWebCrypto";
 
 
 
@@ -23,6 +25,11 @@ userRouter.post('/signup', async (c) => {
   
       const userService = createUserService(c.env)
       const controller = createController(userService)
+      // await webCrypto()
+      // await hashPassword("This is a test password")
+      // const start = performance.now()
+      // await createHash("This is a test")
+      // console.log("Time required to create hash", performance.now() - start)
       return await controller.signup(c)
    
    } catch (error) {

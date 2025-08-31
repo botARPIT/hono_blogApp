@@ -1,4 +1,4 @@
-import { createHash, compareHash } from "../utils/hash";
+// import { createHash, compareHash } from "../utils/hash";
 import { userSignUpSchema, userSignInSchema, CreatedUser, UserSignUpDTO, UserSignInDTO, AuthProvider } from "../types/user.types"
 import { createUser, findUniqueUser } from "../repositories/user.repository";
 
@@ -6,6 +6,7 @@ import { Bindings, EnvironmentVariables } from "../types/env.types";
 import { generateAccessToken, generateTokens } from "../utils/jwt";
 import { AppError, BadRequestError, ErrorCode, NotFoundError, ServiceName, SeverityLevel, ValidationError } from "../errors/app-error";
 import { Token } from "../types/jwt.types";
+import {compareHash, hashPassword} from "../utils/hashUsingWebCrypto";
 
 
 
@@ -20,7 +21,8 @@ class UserService {
       if(user && user.password == null) throw new BadRequestError("User already exists", ServiceName.BUSINESS, {message: "Try to sign in with your google account"})
         else if(user && user.password != null) throw new BadRequestError("User already exists", ServiceName.BUSINESS, {message: "Try to sign in with your registered credentials"})
       let hashedPass;
-      if(dto.password != null) {hashedPass = await createHash(dto.password)}
+      // if(dto.password != null) {hashedPass = await createHash(dto.password)}
+       if(dto.password != null) {hashedPass = await hashPassword(dto.password)}
       if (!hashedPass ) throw new AppError("Hashing service failed", 500, ErrorCode.INTERNAL_ERROR, false,  Date.now(), SeverityLevel.CRITICAL, {message: "Enter the password again"}, ServiceName.BUSINESS)
       
       const userCreated = await createUser(dto.name, dto.email, hashedPass, this.env.DATABASE_URL, AuthProvider.LOCAL )
@@ -45,6 +47,7 @@ class UserService {
         throw new BadRequestError("User not found", ServiceName.BUSINESS, {message: "Kindly signup first"})
       }
       // if(dto.password == null && dto.authProvider == AuthProvider.GOOGLE) {hasValidPass = null}
+      // 
       if ( dto.password != null && user.password != null) {hasValidPass = await compareHash(dto.password, user.password)}
       if (!hasValidPass) {
         throw new ValidationError("Password does not match", ServiceName.BUSINESS, {message: "Enter correct password"})
