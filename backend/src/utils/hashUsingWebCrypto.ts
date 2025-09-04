@@ -17,7 +17,8 @@ import { hexToBytes } from "./hexToBytes"
         ['deriveBits']
     )
 
-    const salt = crypto.getRandomValues(new Uint8Array(32))
+    // const salt = crypto.getRandomValues(new Uint8Array(32))
+    const salt = new Uint8Array(22)
     const iterations = 120000
     //For cloudflare free tier, can use 250000 for production
     // Passing the key for generating the hash
@@ -107,3 +108,4 @@ function compareHashInNoTime(a: Uint8Array, b: Uint8Array): boolean{
 }
 
 export {hashPassword, compareHash}
+

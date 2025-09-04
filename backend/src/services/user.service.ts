@@ -32,7 +32,7 @@ class UserService {
      return token
 
     } catch (error) {
-      throw new BadRequestError("User does not exist", ServiceName.BUSINESS, {message: "Try to sign in with your registered credentials"})
+      throw new BadRequestError("User already exist", ServiceName.BUSINESS, {message: "Try to sign in with your registered credentials"})
     }
   }
 
@@ -48,6 +48,7 @@ class UserService {
       }
       // if(dto.password == null && dto.authProvider == AuthProvider.GOOGLE) {hasValidPass = null}
       // 
+      console.log(user)
       if ( dto.password != null && user.password != null) {hasValidPass = await compareHash(dto.password, user.password)}
       if (!hasValidPass) {
         throw new ValidationError("Password does not match", ServiceName.BUSINESS, {message: "Enter correct password"})

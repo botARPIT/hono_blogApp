@@ -31,14 +31,14 @@ export {createHash, compareHash} ;
 // export const compareHash = async(password: string, hash: string) => {
 //     return await verify({pass: password, encoded: hash})
 // }
-export async function webCrypto(){
-    const password = "This is a password for testing the web crypto api"
-const myText = new TextEncoder().encode(password)
-console.log(myText)
-const hash = await crypto.subtle.digest({
-    name: 'SHA-256'
-}, myText)
+// export async function webCrypto(){
+//     const password = "This is a password for testing the web crypto api"
+// const myText = new TextEncoder().encode(password)
+// console.log(myText)
+// const hash = await crypto.subtle.digest({
+//     name: 'SHA-256'
+// }, myText)
 
-console.log(hash)
-console.log(new Uint8Array(hash))
-}
+// console.log(hash)
+// console.log(new Uint8Array(hash))
+// }

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.57",
+    "@hono-rate-limiter/cloudflare": "^0.2.2",
     "@prisma/client": "^6.11.1",
     "@prisma/extension-accelerate": "^2.0.2",
     "@supabase/supabase-js": "^2.52.1",
@@ -18,6 +19,7 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.0",
     "hono": "^4.8.5",
+    "hono-rate-limiter": "^0.4.2",
     "jsonwebtoken": "^9.0.2",
     "zod": "^3.25.75"
   },

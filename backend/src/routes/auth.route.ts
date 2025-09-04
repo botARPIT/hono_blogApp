@@ -1,3 +1,4 @@
+
 import { Bindings } from './../types/env.types';
 import { Hono } from "hono";
 import { fetchTokenFromGoogle } from '../auth/auth';
@@ -15,8 +16,14 @@ authRouter.get('/callback/google', async (c) => {
     const authService = createAuthService(c.env)
     const authController = createAuthController(authService)
     await authController.getAuthResponse(c)
-    return c.redirect("http://localhost:5173/blogs")
+    return c.redirect(c.env.REDIRECT_URI)
    
 })
+
+// authRouter('/refresh', async (c) => {
+//     const authService = createAuthService(c.env)
+//     const authController = createAuthController(authService)
+//    return await authController.getRefreshToken()
+// })
 
 export { authRouter }

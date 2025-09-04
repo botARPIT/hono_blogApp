@@ -9,7 +9,7 @@ import 'dotenv/config'
 import { Bindings } from '../types/env.types';
 import createController from "../controllers/user.controller";
 import { handleError } from "../errors/handle-error";
-import { createHash, webCrypto } from "../utils/hash";
+import { createHash } from "../utils/hash";
 import {hashPassword} from "../utils/hashUsingWebCrypto";
 
 

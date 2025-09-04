@@ -13,19 +13,20 @@
    "SUPABASE_URL" : "https://rreymtgxoiszdwpdlhup.supabase.co",
    "SUPABASE_SERVICE_ROLE_KEY" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZXltdGd4b2lzemR3cGRsaHVwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzM1NDM2OCwiZXhwIjoyMDY4OTMwMzY4fQ.MPMprlnvwOsinW071XQTSJViq45YQw7l28Erlz16tIM",
    "GOOGLE_CLIENT_ID": "416523459097-00rma2tr9upbge9uuoto8dsaf1356bu8.apps.googleusercontent.com",
-   "GOOGLE_CLIENT_SECRET": "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"
+   "GOOGLE_CLIENT_SECRET": "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",
+   "REDIRECT_URI": "http://localhost:3000"
 
   },
 
   "placement": {
       "mode" : "smart"  
     },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "a117436b6cca4cd68894431e8f140c8c"
+    }
+  ],
   // "r2_buckets": [
   //   {
   //     "binding": "MY_BUCKET",
