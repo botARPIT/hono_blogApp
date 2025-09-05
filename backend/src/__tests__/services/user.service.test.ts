@@ -4,9 +4,11 @@ import { createUserService } from "../../services/user.service";
 import { EnvironmentVariables } from '../../types/env.types';
 
  const mockBindings:  EnvironmentVariables = {
-        DATABASE_URL : "xyv",
-        JWT_ACCESS_SECRET: "vdv",
-        JWT_REFRESH_SECRET: "dwd"
+        DATABASE_URL : "abc",
+        JWT_ACCESS_SECRET: "abc",
+        JWT_REFRESH_SECRET: "abc",
+        GOOGLE_CLIENT_ID: "abc",
+        GOOGLE_CLIENT_SECRET: "abc"
     }
 
 

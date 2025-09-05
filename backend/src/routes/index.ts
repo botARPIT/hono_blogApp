@@ -14,7 +14,7 @@ import {rateLimiter} from 'hono-rate-limiter'
 import {WorkersKVStore} from "@hono-rate-limiter/cloudflare"
 const mainRouter = new Hono<{Bindings: Bindings}>();
 mainRouter.use("/*", cors({
-    origin: ['https://69715f30.hono-blogapp.pages.dev',
+    origin: ['https://bd2e6478.hono-blogapp.pages.dev',
         "https://267939c1.hono-blogapp.pages.dev",
      "http://localhost:5173"],
     credentials: true

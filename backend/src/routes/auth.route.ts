@@ -20,10 +20,13 @@ authRouter.get('/callback/google', async (c) => {
    
 })
 
-// authRouter('/refresh', async (c) => {
-//     const authService = createAuthService(c.env)
-//     const authController = createAuthController(authService)
-//    return await authController.getRefreshToken()
-// })
+authRouter.get('/refresh', async (c) => {
+    if(!c.env) {return c.json({message: "Server configuration error"}, 500)}
+    const authService = createAuthService(c.env)
+    const authController = createAuthController(authService)
+    const res = await authController.generateRefreshToken(c)
+    return c.json({message: res})
+
+})
 
 export { authRouter }

@@ -1,6 +1,7 @@
 import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog } from "../repositories/blog.repository";
 import { Bindings, EnvironmentVariables } from "../types/env.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
+import { NotFoundError } from "../errors/app-error";
 
 class BlogService {
     constructor(private env : EnvironmentVariables) {}
@@ -24,9 +25,10 @@ class BlogService {
       
     }
 
-    async getBlog(id: string) : Promise<GetBlogDTO>{
-       return await getBlogById(id, this.env.DATABASE_URL)
-      
+    async getBlog(id: string) : Promise<GetBlogDTO | null>{ 
+       const response = await getBlogById(id, this.env.DATABASE_URL)
+      if(response == null) throw new NotFoundError("Blog not found")
+        else return response
     }
 }
 

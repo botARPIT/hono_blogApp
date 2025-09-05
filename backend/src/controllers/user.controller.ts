@@ -22,7 +22,10 @@ import { setCookies } from "../utils/setCookies";
     async signin(c: Context){
         const body = await c.req.json<UserSignInDTO>()
         const inputValidation = userInputPolicy.validateSignIn(body)
-        if(!inputValidation.success) throw new ZodValidationError("Zod validation failed", {message: "Incorrect email/password"})
+        console.log(inputValidation)
+        if(!inputValidation.success) {
+    
+            throw new ZodValidationError("Validation error" , {field: "Incorrect email/password",  message: "Password should be of minimum 8 of characters"},)}
             const result = await this.userService.signin(inputValidation.data)
         setCookies(c, result)
         return c.json(result)

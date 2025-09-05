@@ -23,7 +23,6 @@ export async function createUser(name: string, email: string, password: string |
         })
          return user 
     } catch (error) {
-         console.log(error)
          throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
@@ -44,7 +43,6 @@ export async function findUniqueUser(email: string, dbUrl: string) {
         })
         return user 
     } catch (error) {
-        console.log(error)
         throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }

@@ -6,6 +6,7 @@ import { GoogleAuthResponse } from "../types/auth.types";
 import { Token } from "../types/jwt.types";
 import { createAuthService } from "../services/auth.service";
 import { setCookies } from "../utils/setCookies";
+import { getCookie } from "hono/cookie";
 
 class AuthController{
     constructor(private authService : ReturnType<typeof createAuthService> ){}
@@ -23,6 +24,13 @@ class AuthController{
     setCookies(c, result)
     // const userId = await jwtVerify(id_token, GOOGLE_CLIENT_SECRET)
     // console.log(userId)
+    }
+
+    async generateRefreshToken(c: Context){
+        
+        const refreshToken = getCookie(c, "refreshToken")
+        if(!refreshToken) return c.json({message: "Unauthorized"}, 401)
+        return this.authService.getRefreshToken(c, refreshToken)
     }
 }
 

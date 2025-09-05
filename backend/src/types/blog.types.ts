@@ -16,7 +16,7 @@ export type BlogDTO = {
 export type AddBlogDTO = Pick<BlogDTO, 'title'  |'content'| 'thumbnail'>
 export type CreatedBlogDTO = Omit<BlogDTO, 'updatedAt' | 'published' | 'like'>
 export type UpdateBlogDTO = Partial<Pick<BlogDTO, 'title' | 'content' | 'thumbnail'>>
-export type GetBlogDTO = Omit<BlogDTO, 'updatedAt' | 'published'>
+export type GetBlogDTO = Omit<BlogDTO, 'updatedAt' | 'published' | 'thumbnail' | 'authorId'>
 export type DeletedBlogDTO = BlogDTO
 
 export const blogSchema = z.object({

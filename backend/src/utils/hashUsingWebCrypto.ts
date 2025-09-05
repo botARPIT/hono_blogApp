@@ -19,8 +19,8 @@ import { hexToBytes } from "./hexToBytes"
 
     // const salt = crypto.getRandomValues(new Uint8Array(32))
     const salt = new Uint8Array(22)
-    const iterations = 120000
-    //For cloudflare free tier, can use 250000 for production
+    const iterations = 100000
+    //For cloudflare free tier use 100000 since iteration count above 100000 are not supported, can use 250000 for production
     // Passing the key for generating the hash
     const hashBuffer = await crypto.subtle.deriveBits(
         {
