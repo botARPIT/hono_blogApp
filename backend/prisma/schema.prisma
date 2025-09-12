@@ -34,6 +34,7 @@ model Blog{
   authorId String @db.Uuid
   author User @relation(fields: [authorId], references: [id])
   title String 
+  tag BlogTag @default(GENERAL)
   content String 
   thumbnail String
   createdAt DateTime @default(now()) @db.Timestamptz()
@@ -41,11 +42,27 @@ model Blog{
   like Int @default(0) @db.Integer
   published Boolean @default(false)
 
-  @@index([id, authorId])
+  @@index([id])
 	@@map("Blog")
 }
 
 enum AuthProvider { 
   LOCAL
   GOOGLE
+}
+
+ enum BlogTag {
+  SOCIAL
+  TECH
+  ENTERTAINMENT
+  INFOTAINMENT
+  SPORTS
+  MOVIES
+  GAMING
+  PHILOSOPHY
+  SCIENCE
+  ART
+  NATURE
+  WILDLIFE
+  GENERAL
 }

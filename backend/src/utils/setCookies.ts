@@ -10,7 +10,7 @@ function setCookies(c:Context, token: Token){
         sameSite: 'None',
         maxAge: 60 * 60 
     })
-
+    console.log("Inside set cookies")
     setCookie(c, "refresh_token", refreshToken, {
         httpOnly: true,
         secure: true,

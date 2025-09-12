@@ -8,7 +8,7 @@ import {  UserSignInDTO, userSignInSchema, UserSignUpDTO, userSignUpSchema } fro
     validateSignUp(dto: UserSignUpDTO): Result<UserSignUpDTO , ValidationError>{
         const result = userSignUpSchema.safeParse(dto)
         if(result.success) return {success: true, data: result.data}
-        return {success: false, error: {message: "Validation error"}}
+        return {success: false, error: {message: result.error}}
     }
 
     validateSignIn(dto: UserSignInDTO): Result<UserSignInDTO, AuthError>{

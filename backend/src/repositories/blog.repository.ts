@@ -18,16 +18,19 @@ export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Binding
                 title: dto.title,
                 content: dto.content,
                 thumbnail: dto.thumbnail,
-                authorId: userId
+                authorId: userId,
+                tag: dto.tag
             },
             select: {
                 id: true,
                 title: true,
                 content: true,
+                tag: true,
                 thumbnail: true,
                 authorId: true,
                 createdAt: true,
-                published: true
+                published: true,
+
             }
         })
         return blog
@@ -69,6 +72,7 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
                 content: true,
                 // thumbnail: true,
                 // authorId: true,
+                tag: true,
                 createdAt: true,
                 like: true,
                 author: {
@@ -116,6 +120,7 @@ export async function getBlogById(id: string, dbUrl: Bindings["DATABASE_URL"]): 
                 id: true,
                 title: true,
                 content: true,
+                tag: true,
                 thumbnail: true,
                 authorId: true,
                 createdAt: true,

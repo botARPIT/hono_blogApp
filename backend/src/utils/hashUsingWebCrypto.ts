@@ -1,7 +1,7 @@
 import { hexToBytes } from "./hexToBytes"
 
 
- async function hashPassword(password: string){
+async function hashPassword(password: string) {
     //Encoding the password to array buffer
     const start = performance.now()
     const encoder = new TextEncoder()
@@ -17,8 +17,8 @@ import { hexToBytes } from "./hexToBytes"
         ['deriveBits']
     )
 
-    // const salt = crypto.getRandomValues(new Uint8Array(32))
-    const salt = new Uint8Array(22)
+    const salt = crypto.getRandomValues(new Uint8Array(32))
+    // const salt = new Uint8Array(22)
     const iterations = 100000
     //For cloudflare free tier use 100000 since iteration count above 100000 are not supported, can use 250000 for production
     // Passing the key for generating the hash
@@ -26,7 +26,7 @@ import { hexToBytes } from "./hexToBytes"
         {
             name: "PBKDF2",
             salt: salt,
-            iterations: iterations, 
+            iterations: iterations,
             hash: "SHA-256"
         },
         keyMaterial,
@@ -35,39 +35,39 @@ import { hexToBytes } from "./hexToBytes"
 
     //Converting the generated hash to hex format for storage
     const hashArray = new Uint8Array(hashBuffer)
-    const hashToHex = Array.from(hashArray)
+    const hashBytesToHashHex = Array.from(hashArray)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('')
     console.log("hash array from create hash", hashArray)
     //Converting the salt to hex for storage
-    const saltToHex = Array.from(salt)
+    const saltBytesToSaltHex = Array.from(salt)
         .map(s => s.toString(16).padStart(2, '0'))
         .join('')
 
 
-    const storedPassword = `Webcrypto:${iterations}:${saltToHex}:${hashToHex}`
+    const storedPassword = `Webcrypto:${iterations}:${saltBytesToSaltHex}:${hashBytesToHashHex}`
     return storedPassword
 }
 
 
-async function compareHash(password: string, storedHash: string): Promise<Boolean>{
+async function compareHash(password: string, storedHash: string): Promise<boolean> {
 
     const arrayOfStoredHash = storedHash.split(":")
-    if(arrayOfStoredHash.length != 4) throw new Error("Invalid hash")
+    if (arrayOfStoredHash.length != 4) throw new Error("Invalid hash")
     const [cryptoStandard, iterations, hexedSalt, hexedHash] = arrayOfStoredHash
 
-    if(cryptoStandard != "Webcrypto") throw new Error("Invalid format")
+    if (cryptoStandard != "Webcrypto") throw new Error("Invalid format")
 
     const parsedIterations = parseInt(iterations)
-    if(parsedIterations < 1000)throw new Error("Invalid iterations count")
+    if (parsedIterations < 1000) throw new Error("Invalid iterations count")
 
     const saltBytes = hexToBytes(hexedSalt)
     const hashBytes = hexToBytes(hexedHash)
-    if(!saltBytes || !hashBytes) throw new Error("Invalid hex data in stored hash")
+    if (!saltBytes || !hashBytes) throw new Error("Invalid hex data in stored hash")
 
-        //Encoding
-        const encoder = new TextEncoder()
-        const passwordBuffer = encoder.encode(password)
+    //Encoding
+    const encoder = new TextEncoder()
+    const passwordBuffer = encoder.encode(password)
     const keyMaterial = await crypto.subtle.importKey(
         "raw",
         passwordBuffer,
@@ -76,11 +76,11 @@ async function compareHash(password: string, storedHash: string): Promise<Boolea
         ['deriveBits']
     )
 
-     const derivedHashBuffer = await crypto.subtle.deriveBits(
+    const derivedHashBuffer = await crypto.subtle.deriveBits(
         {
             name: "PBKDF2",
             salt: saltBytes,
-            iterations: parsedIterations, 
+            iterations: parsedIterations,
             hash: "SHA-256"
         },
         keyMaterial,
@@ -96,16 +96,16 @@ async function compareHash(password: string, storedHash: string): Promise<Boolea
 
 }
 
-function compareHashInNoTime(a: Uint8Array, b: Uint8Array): boolean{
+function compareHashInNoTime(a: Uint8Array, b: Uint8Array): boolean {
     //This is to prevent leaky time attack
-    if(a.length != b.length) return false
+    if (a.length != b.length) return false
     let numberOfDifferences = 0
-    for(let i = 0; i < a.length; i++){
+    for (let i = 0; i < a.length; i++) {
         numberOfDifferences |= a[i] ^ b[i]
     }
     return numberOfDifferences === 0
 
 }
 
-export {hashPassword, compareHash}
+export { hashPassword, compareHash }
 

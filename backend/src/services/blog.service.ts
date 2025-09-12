@@ -16,8 +16,11 @@ class BlogService {
 
     }
 
-    async getBlogs(page: number) : Promise<GetBlogDTO[]> {
-        return await getAllBlogs(page, this.env.DATABASE_URL)
+    async getBlogs(page: number) : Promise<GetBlogDTO[] > {
+        const result = await getAllBlogs(page, this.env.DATABASE_URL)
+        if(!result.length) throw new NotFoundError("Cannot find blogs")
+        else return result
+
     }
 
     async delete(id: string, authorId: string): Promise<DeletedBlogDTO>{
@@ -25,14 +28,14 @@ class BlogService {
       
     }
 
-    async getBlog(id: string) : Promise<GetBlogDTO | null>{ 
-       const response = await getBlogById(id, this.env.DATABASE_URL)
-      if(response == null) throw new NotFoundError("Blog not found")
-        else return response
+    async getBlog(id: string) : Promise<GetBlogDTO>{ 
+       const result = await getBlogById(id, this.env.DATABASE_URL)
+      if(result == null) throw new NotFoundError("Blog not found")
+        else return result
     }
 }
 
 //factory function
-export function createBlogService(env: Bindings){
+export function createBlogService(env: EnvironmentVariables){
     return new BlogService(env)
 }

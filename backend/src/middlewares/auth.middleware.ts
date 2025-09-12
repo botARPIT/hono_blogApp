@@ -42,8 +42,10 @@ export const authMiddleware = createMiddleware<{Bindings: Bindings, Variables: V
    //  if(header !== AUTH_HEADER.Bearer || !token){
    //    throw new BadRequestError("Invalid Authorization format")
    //  }
-   console.log("authMiddleware hit", c.req.path)
+   console.log("authMiddleware hit")
+   console.log('Middleware hit')
     const token = getCookie(c, "access_token")
+    console.log("Token", token)
     if(!token) return c.json({message: "Unauthorized"}, 401)
        try {
     const payload = await jwtVerify(token , c.env.JWT_ACCESS_SECRET)

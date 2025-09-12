@@ -1,12 +1,12 @@
 import { Context, Next } from "hono";
-import { AppError } from "../errors/app-error";
+import { AppError, NotFoundError } from "../errors/app-error";
 
 
 export async function handleErrorMiddleware
-(c: Context, next: Next){
-try {
-   await next();
-} catch (error: unknown) {
+( error: unknown, c: Context,){
+// try {
+//    await next();
+// } catch (error) {
        if(error instanceof AppError){
         return c.json({
             error: {
@@ -29,4 +29,4 @@ try {
     }, 500)
 }
  
-}
+// }

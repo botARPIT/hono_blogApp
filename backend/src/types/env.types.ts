@@ -15,5 +15,7 @@ export interface EnvironmentVariables {
    JWT_ACCESS_SECRET: string,
    JWT_REFRESH_SECRET: string,
    GOOGLE_CLIENT_ID: string,
-   GOOGLE_CLIENT_SECRET: string
+   GOOGLE_CLIENT_SECRET: string,
+    REDIRECT_URI: string,
+   RATE_LIMIT_KV: string
 }

@@ -34,7 +34,14 @@ mainRouter.use((c: Context, next: Next) =>
 
 mainRouter.use("/*",logger())
 // mainRouter.use("/*", timeout(5000))
-mainRouter.use("/*", handleErrorMiddleware)
+mainRouter.onError(handleErrorMiddleware)
+// mainRouter.onError((err, c) => {
+//     console.log("Dummy onError hit")
+// return c.json({
+//     message: "This is dummy error hit"
+// }, 500)
+// }
+// )
 mainRouter.route("api/v1/user", userRouter)
 mainRouter.route("api/v1/blog", blogRouter)
 mainRouter.route("api/v1/auth", authRouter)
