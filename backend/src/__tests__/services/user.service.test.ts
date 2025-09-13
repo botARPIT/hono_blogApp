@@ -1,5 +1,5 @@
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createUserService } from "../../services/user.service";
 import { EnvironmentVariables } from '../../types/env.types';
 import * as userRepo from '../../repositories/user.repository'
@@ -17,6 +17,9 @@ describe('Tests for user service', () => {
         REDIRECT_URI: "abc",
         RATE_LIMIT_KV: "abc"
     }
+     beforeEach(() => {
+        vi.clearAllMocks()
+    })
      const service = createUserService(mockedEnv)
     describe("tests for getProfileInfo method", () => {
         it('should return the user profile', async () => {

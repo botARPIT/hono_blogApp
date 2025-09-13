@@ -19,7 +19,7 @@ model User {
   name String 
   email String @unique
   password String?
-  providerId AuthProvider @default(LOCAL)
+  authProvider AuthProvider @default(LOCAL)
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
   isAdmin Boolean @default(false)

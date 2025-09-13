@@ -9,8 +9,10 @@ export enum ErrorCode {
     VALIDATION_FAILED = "VALIDATION FAILED",
     INTERNAL_ERROR = "INTERNAL ERROR",
     ZOD_ERROR = "ZOD_ERROR",
-    DB_ERROR = "DB_ERROR"
+    DB_ERROR = "DB_ERROR",
+    AUTH_ERROR = "AUTH_ERROR"
 }
+
 
 export enum SeverityLevel {
     CRITICAL = "CRITICAL",
@@ -77,6 +79,12 @@ export class BadRequestError extends AppError {
 export class ZodValidationError extends AppError {
     constructor(message: string = "Zod validation error", meta: Record<string, any>) {
         super(message, 400, ErrorCode.ZOD_ERROR, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.CONTROLLER)
+    }
+}   
+
+export class AuthError extends AppError{
+    constructor(message: string = "Authentication Error",isOperational: boolean, meta: Record<string, string> ){
+        super(message, 401, ErrorCode.AUTH_ERROR, isOperational, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.BUSINESS)
     }
 }
 

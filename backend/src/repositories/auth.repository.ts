@@ -1,10 +1,11 @@
 
 import { AppError, BadRequestError, ErrorCode, ServiceName } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
-import { AuthProvider } from "../types/user.types";
+import { CreatedUserDTO, ExistingUserDTO, UserSignUpDTO } from "../types/user.types";
 import { prismaErrorObject, prismaErrorWrapper } from "../errors/prismaErrorWrapper";
+import { AuthProvider } from "@prisma/client/edge";
 
-export async function createUser(name: string, email: string, password: string | null, dbUrl: string, authProvider: AuthProvider.LOCAL | AuthProvider.GOOGLE) {
+export async function createUser(name: string, email: string, password: string | null, dbUrl: string, authProvider: AuthProvider): Promise<CreatedUserDTO | null> {
     const prisma = getPrismaClient(dbUrl)
     try {
         const user = await prisma.user.create({
@@ -12,7 +13,7 @@ export async function createUser(name: string, email: string, password: string |
                 name,
                 email,
                 password,
-                providerId: authProvider
+                authProvider
             }, 
             select: {
                 id: true,
@@ -21,13 +22,14 @@ export async function createUser(name: string, email: string, password: string |
                 createdAt: true
             }
         })
+        if(!user) return null
          return user 
     } catch (error) {
          throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
-export async function findUniqueUser(email: string, dbUrl: string) {
+export async function findUniqueUser(email: string, dbUrl: string): Promise<ExistingUserDTO | null> {
     try {
         const prisma = getPrismaClient(dbUrl);
         const user = await prisma.user.findUnique({
@@ -38,9 +40,11 @@ export async function findUniqueUser(email: string, dbUrl: string) {
                 id: true,
                 name: true,
                 password: true,
-                providerId: true
+                authProvider: true,
+                email: true
             }
         })
+        if(!user) return null
         return user 
     } catch (error) {
         throw prismaErrorWrapper(error as prismaErrorObject)
