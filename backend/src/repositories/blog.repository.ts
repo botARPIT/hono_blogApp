@@ -60,7 +60,7 @@ export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: s
 
 export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO[]> {
     try {
-        { !page ? page = 1 : page }
+        { !page || page < 0 ? page = 1 : page }
         const prisma = getPrismaClient(dbUrl)
         const allBlogs = await prisma.blog.findMany({
             orderBy: { updatedAt: 'desc' },
