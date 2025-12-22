@@ -2,40 +2,59 @@ import { Link } from 'react-router-dom'
 import Appbar from '../components/Appbar'
 import BlogCard from '../components/BlogCard'
 import Loading from '../components/Loading'
+import { useBlogs } from '../hooks/queries'
 
-import { useBlogs } from '../hooks'
-
-export default function Blogs () {
-  const { loading, blogs } = useBlogs()
-  if (loading) {
+export default function Blogs() {
+  const { data: blogs = [], isLoading, isError } = useBlogs()
+  
+  if (isLoading) {
     return (
-      <div className=''>
+      <div>
+        <Appbar />
         <Loading />
       </div>
     )
   }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Appbar />
+        <div className='container mx-auto py-8 px-4 text-center'>
+          <p className="text-muted-foreground">Error loading blogs. Please try again.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <Appbar />
-      <div className='flex justify-center'>
-        <div className='max-w-xl'>
-          {blogs.map(blog => (
-            <Link to={`/blog/${blog.id}`}>
-              <BlogCard
-                authorName={blog.author.name}
-                title={blog.title}
-                content={blog.content}
-                createdAt={new Date(blog.createdAt).toLocaleDateString(
-                  'en-US',
-                  {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  }
-                )}
-              />
-            </Link>
-          ))}
+      <div className='container mx-auto py-4 md:py-8 px-4'>
+        <div className='max-w-3xl mx-auto'>
+          {blogs.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No blogs found. Be the first to publish one!</p>
+            </div>
+          ) : (
+            blogs.map(blog => (
+              <Link key={blog.id} to={`/blog/${blog.id}`}>
+                <BlogCard
+                  authorName={blog.author.name}
+                  title={blog.title}
+                  content={blog.content}
+                  createdAt={new Date(blog.createdAt).toLocaleDateString(
+                    'en-US',
+                    {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    }
+                  )}
+                />
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </div>

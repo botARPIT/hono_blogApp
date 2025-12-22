@@ -1,4 +1,4 @@
-import userProfile from '../assets/user_profile.png'
+import Avatar from './Avatar'
 
 type BlogCardProps = {
   authorName: string
@@ -6,37 +6,26 @@ type BlogCardProps = {
   content: string
   createdAt: string
 }
-export default function BlogCard ({
-  authorName,
-  title,
-  content,
-  createdAt
-}: BlogCardProps) {
+
+const BlogCard = ({ authorName, title, content, createdAt }: BlogCardProps) => {
+  // Strip HTML tags and replace with spaces to prevent word joining
+  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  
   return (
-    <div className="border-b-2 border-slate-200 pb-2 mt-2 cursor-pointer">
-      <div className='flex'>
-        <div className='flex justify-center flex-col'>
-          <img
-            className='w-8 h-8 rounded-full'
-            src={userProfile}
-            alt='Rounded avatar'
-          ></img>
-        </div>
-        
-          <div className='font-extralight flex justify-center flex-col pl-2 text-sm '>
-            {authorName} 
-          </div>
-          <div className='ml-1 mt-3 w-2 h-2 bg-slate-500 border-2 border-white rounded-full'></div>
-          
-          <div className='font-thin flex justify-center flex-col pl-2 text-slate-600 text-sm '>{createdAt}</div>
-    
+    <div className='p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-muted/50 transition-colors'>
+      <div className='flex items-center gap-2 md:gap-3 mb-2'>
+        <Avatar prop={authorName} />
+        <div className='font-semibold text-sm md:text-base text-foreground'>{authorName}</div>
+        <div className='text-xs md:text-sm text-muted-foreground'>{createdAt}</div>
       </div>
-      <div className='text-xl font-bold'>{title}</div>
-      <div className='text-md font-light'>{content.slice(0, 150) + ((content.length > 100 )? '...' : '')}</div>
-      <div className='text-slate-600 text-sm font-thin pt-2'>{`${Math.ceil(content.length / 200)} min read`}</div>
-      {/* <div>
-        <img className="h-auto max-w-lg ms-auto" src="/docs/images/examples/image-1@2x.jpg" alt="image description" />
-</div> */}
+      <div className='text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2'>
+        {title}
+      </div>
+      <div className='text-sm md:text-base font-normal text-muted-foreground line-clamp-3'>
+        {plainText.slice(0, 200)}...
+      </div>
     </div>
   )
 }
+
+export default BlogCard

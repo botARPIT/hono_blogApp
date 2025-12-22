@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { BACKEND_URL } from '../config'
 import { toast } from 'sonner'
@@ -7,18 +7,29 @@ import { RichTextEditor } from '../components/RichTextEditor'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import Appbar from '../components/Appbar'
-import { BlogTag, type BlogTag as BlogTagType } from '../types/blog'
+import { useBlog } from '../hooks/queries'
+import Loading from '../components/Loading'
 
-const Publish = () => {
+export default function EditBlog() {
+  const { id } = useParams<{ id: string }>()
+  const { data: blog, isLoading: blogLoading } = useBlog(id || '')
+  const navigate = useNavigate()
+
+  
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [tag, setTag] = useState<BlogTagType>(BlogTag.GENERAL)
   const [thumbnail, setThumbnail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (blog) {
+      setTitle(blog.title)
+      setContent(blog.content)
+      // Note: thumbnail might not be in BlogDTO, adjust if needed
+    }
+  }, [blog])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,29 +52,47 @@ const Publish = () => {
       return
     }
 
-    setLoading(true)
+    setSaving(true)
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/v1/blog/addBlog`,
+      await axios.patch(
+        `${BACKEND_URL}/api/v1/blog/updateBlog/${id}`,
         { 
           title, 
           content, 
-          thumbnail: thumbnail || 'https://via.placeholder.com/800x400', 
-          tag,
-          published: true
+          thumbnail: thumbnail || undefined 
         },
         { withCredentials: true }
       )
-      toast.success('Blog published successfully!')
-      navigate(`/blog/${response.data.id}`)
+      toast.success('Blog updated successfully!')
+      navigate(`/blog/${id}`)
     } catch (error) {
-      const message = axios.isAxiosError(error) 
-        ? error.response?.data?.error?.message 
-        : 'Failed to publish blog'
-      toast.error(message || 'Failed to publish blog')
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error?.message
+        : 'Failed to update blog'
+      toast.error(message || 'Failed to update blog')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
+  }
+
+  if (blogLoading) {
+    return (
+      <div>
+        <Appbar />
+        <Loading />
+      </div>
+    )
+  }
+
+  if (!blog) {
+    return (
+      <div>
+        <Appbar />
+        <div className="container mx-auto py-8 text-center">
+          <p>Blog not found</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -72,8 +101,8 @@ const Publish = () => {
       <div className="container mx-auto py-4 md:py-8 max-w-4xl px-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl">Create New Blog</CardTitle>
-            <CardDescription>Share your thoughts with the world</CardDescription>
+            <CardTitle className="text-2xl md:text-3xl">Edit Blog</CardTitle>
+            <CardDescription>Update your blog post</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
@@ -83,25 +112,10 @@ const Publish = () => {
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter blog title (min 10 characters)"
                   required
                   minLength={10}
                   maxLength={100}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tag">Category</Label>
-                <Select value={tag} onValueChange={(value) => setTag(value as BlogTagType)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(Object.values(BlogTag) as BlogTagType[]).map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
@@ -110,8 +124,8 @@ const Publish = () => {
                   id="thumbnail"
                   value={thumbnail}
                   onChange={(e) => setThumbnail(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
                   type="url"
+                  placeholder="https://example.com/image.jpg"
                 />
               </div>
 
@@ -120,15 +134,14 @@ const Publish = () => {
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
-                  placeholder="Write your blog content here..."
                 />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
-                <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-                  {loading ? 'Publishing...' : 'Publish'}
+                <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => navigate('/blogs')} className="w-full sm:w-auto">
+                <Button type="button" variant="outline" onClick={() => navigate(`/blog/${id}`)} className="w-full sm:w-auto">
                   Cancel
                 </Button>
               </div>
@@ -140,4 +153,4 @@ const Publish = () => {
   )
 }
 
-export default Publish
+

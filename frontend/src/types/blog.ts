@@ -1,0 +1,18 @@
+export const BlogTag = {
+  SOCIAL: "SOCIAL",
+  TECH: "TECH",
+  ENTERTAINMENT: "ENTERTAINMENT",
+  INFOTAINMENT: "INFOTAINMENT",
+  SPORTS: "SPORTS",
+  MOVIES: "MOVIES",
+  GAMING: "GAMING",
+  PHILOSOPHY: "PHILOSOPHY",
+  SCIENCE: "SCIENCE",
+  ART: "ART",
+  NATURE: "NATURE",
+  WILDLIFE: "WILDLIFE",
+  GENERAL: "GENERAL"
+} as const
+
+export type BlogTag = typeof BlogTag[keyof typeof BlogTag]
+
