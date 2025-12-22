@@ -66,129 +66,129 @@ describe('Testing the auth service', () => {
 
             expect(result).toEqual(mockedTokens)
             expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
-            expect(hashUtil.hashPassword).toHaveBeenCalledWith(mockedSignupUser.password)   
+            expect(hashUtil.hashPassword).toHaveBeenCalledWith(mockedSignupUser.password)
             expect(authRepo.createUser).toHaveBeenCalledWith(mockedSignupUser.name, mockedSignupUser.email, mockedHashedPassword, mockedEnv.DATABASE_URL, AuthProvider.LOCAL)
             expect(jwtUtil.generateTokens).toHaveBeenCalledWith(mockedPayload, mockedEnv.JWT_ACCESS_SECRET, mockedEnv.JWT_REFRESH_SECRET)
         })
 
-        it('should throw BadRequestError when user already exists with password', async ()=> {
-                const mockedSignupUser = {
-                    name: "Test",
-                    email: "test@mail.com",
-                    password: "Test password"
-                }
+        it('should throw BadRequestError when user already exists with password', async () => {
+            const mockedSignupUser = {
+                name: "Test",
+                email: "test@mail.com",
+                password: "Test password"
+            }
 
-                const mockedExistingUser = {
-                    id: "User123",
-                    name: mockedSignupUser.name,
-                    email: mockedSignupUser.email,
-                    password: "Hashed password",
-                    authProvider: AuthProvider.LOCAL
-                }
+            const mockedExistingUser = {
+                id: "User123",
+                name: mockedSignupUser.name,
+                email: mockedSignupUser.email,
+                password: "Hashed password",
+                authProvider: AuthProvider.LOCAL
+            }
 
-                vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
-                await expect(service.signup(mockedSignupUser)).rejects.toThrow("User already exists")
-                expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
-            })
+            vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
+            await expect(service.signup(mockedSignupUser)).rejects.toThrow("User already exists")
+            expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
+        })
 
-               it('should throw BadRequestError when user already exists with google account', async ()=> {
-                const mockedSignupUser = {
-                    name: "Test",
-                    email: "test@mail.com",
-                    password: null
-                }
+        it('should throw BadRequestError when user already exists with google account', async () => {
+            const mockedSignupUser = {
+                name: "Test",
+                email: "test@mail.com",
+                password: null
+            }
 
-                const mockedExistingUser = {
-                    id: "User123",
-                    name: mockedSignupUser.name,
-                    email: mockedSignupUser.email,
-                    password: null,
-                    authProvider: AuthProvider.GOOGLE
-                }
+            const mockedExistingUser = {
+                id: "User123",
+                name: mockedSignupUser.name,
+                email: mockedSignupUser.email,
+                password: null,
+                authProvider: AuthProvider.GOOGLE
+            }
 
-                vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
-                await expect(service.signup(mockedSignupUser)).rejects.toThrow("User already exists")
-                expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
-            })
+            vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
+            await expect(service.signup(mockedSignupUser)).rejects.toThrow("User already exists")
+            expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
+        })
 
 
-        it('should throw an AppError when the hashing service fails', async() => {
-                const mockedSignupUser = {
-                    name: "Test",
-                    email: "test@mail.com",
-                    password: "Test password"
-                  }
+        it('should throw an AppError when the hashing service fails', async () => {
+            const mockedSignupUser = {
+                name: "Test",
+                email: "test@mail.com",
+                password: "Test password"
+            }
 
-                  vi.mocked(authRepo.findUniqueUser).mockResolvedValue(null)
-                  vi.mocked(hashUtil.hashPassword).mockRejectedValue(undefined)
+            vi.mocked(authRepo.findUniqueUser).mockResolvedValue(null)
+            vi.mocked(hashUtil.hashPassword).mockRejectedValue(undefined)
 
-                  await expect(service.signup(mockedSignupUser)).rejects.toThrow("Hashing service failed")
+            await expect(service.signup(mockedSignupUser)).rejects.toThrow("Hashing service failed")
 
-                  expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
-                  expect(hashUtil.hashPassword).toHaveBeenCalledWith(mockedSignupUser.password)
+            expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
+            expect(hashUtil.hashPassword).toHaveBeenCalledWith(mockedSignupUser.password)
 
-            })
+        })
 
-        it("should throw AppError when the service fails fails to create user after successfully hashing the password", async()=> {
-                const mockedSignupUser = {
-                    name: "User456",
-                    email: "test@mail.com",
-                    password: "Test password"
-                }
+        it("should throw AppError when the service fails fails to create user after successfully hashing the password", async () => {
+            const mockedSignupUser = {
+                name: "User456",
+                email: "test@mail.com",
+                password: "Test password"
+            }
 
-                const mockedHashedPassword = "Hashed password"
+            const mockedHashedPassword = "Hashed password"
 
-                vi.mocked(authRepo.findUniqueUser).mockResolvedValue(null)
-                vi.mocked(hashUtil.hashPassword).mockResolvedValue(mockedHashedPassword)
-                vi.mocked(authRepo.createUser).mockResolvedValue(null)
-                await expect(service.signup(mockedSignupUser)).rejects.toThrow("Unable to create user")
-                await expect(service.signup(mockedSignupUser)).rejects.toBeInstanceOf(Error)
+            vi.mocked(authRepo.findUniqueUser).mockResolvedValue(null)
+            vi.mocked(hashUtil.hashPassword).mockResolvedValue(mockedHashedPassword)
+            vi.mocked(authRepo.createUser).mockResolvedValue(null)
+            await expect(service.signup(mockedSignupUser)).rejects.toThrow("Unable to create user")
+            await expect(service.signup(mockedSignupUser)).rejects.toBeInstanceOf(Error)
 
-                expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
-                expect(hashUtil.hashPassword).toHaveBeenCalledWith(mockedSignupUser.password)
-                expect(authRepo.createUser).toHaveBeenCalledWith(mockedSignupUser.name, mockedSignupUser.email, mockedHashedPassword, mockedEnv.DATABASE_URL, AuthProvider.LOCAL)
-            })
-            
+            expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
+            expect(hashUtil.hashPassword).toHaveBeenCalledWith(mockedSignupUser.password)
+            expect(authRepo.createUser).toHaveBeenCalledWith(mockedSignupUser.name, mockedSignupUser.email, mockedHashedPassword, mockedEnv.DATABASE_URL, AuthProvider.LOCAL)
+        })
+
     })
 
     describe('tests for signin method of auth service', () => {
-         const mockedSignupUser = {
-                    email: "test@mail.com",
-                    password: "Test pass",
-                    authProvider: AuthProvider.LOCAL
-                }
+        const mockedSignupUser = {
+            email: "test@mail.com",
+            password: "Test pass",
+            authProvider: AuthProvider.LOCAL
+        }
 
-                    const mockedHashedPassword = "Hashed password"
-                const mockedExistingUser = {
-                    id: 'user123', 
-                    name: 'Test name',
-                    email: mockedSignupUser.email,
-                    password: mockedHashedPassword,
-                    authProvider: AuthProvider.LOCAL
-                }
-                const mockedTokens = {
-                    accessToken: "This is mocked access token",
-                    refreshToken: "This is mocked refresh token"
-                }
+        const mockedHashedPassword = "Hashed password"
+        const mockedExistingUser = {
+            id: 'user123',
+            name: 'Test name',
+            email: mockedSignupUser.email,
+            password: mockedHashedPassword,
+            authProvider: AuthProvider.LOCAL
+        }
+        const mockedTokens = {
+            accessToken: "This is mocked access token",
+            refreshToken: "This is mocked refresh token"
+        }
 
-                const mockedPayload = {
-                    id: mockedExistingUser.id,
-                    name: mockedExistingUser.name
-                }
-        it('should return tokens on successfull signin when using email and password', async() => {
-                vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
-                vi.mocked(hashUtil.compareHash).mockResolvedValue(true)
-                vi.mocked(jwtUtil.generateTokens).mockReturnValue(mockedTokens)
+        const mockedPayload = {
+            id: mockedExistingUser.id,
+            name: mockedExistingUser.name
+        }
+        it('should return tokens on successfull signin when using email and password', async () => {
+            vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
+            vi.mocked(hashUtil.compareHash).mockResolvedValue(true)
+            vi.mocked(jwtUtil.generateTokens).mockReturnValue(mockedTokens)
 
-                const result = await service.signin(mockedSignupUser)
-                
-                expect(result).toEqual(mockedTokens)
-                expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
-                expect(hashUtil.compareHash).toHaveBeenCalledWith(mockedSignupUser.password, mockedHashedPassword)
-                expect(jwtUtil.generateTokens).toHaveBeenCalledWith(mockedPayload, mockedEnv.JWT_ACCESS_SECRET, mockedEnv.JWT_REFRESH_SECRET)
+            const result = await service.signin(mockedSignupUser)
+
+            expect(result).toEqual(mockedTokens)
+            expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
+            expect(hashUtil.compareHash).toHaveBeenCalledWith(mockedSignupUser.password, mockedHashedPassword)
+            expect(jwtUtil.generateTokens).toHaveBeenCalledWith(mockedPayload, mockedEnv.JWT_ACCESS_SECRET, mockedEnv.JWT_REFRESH_SECRET)
         })
 
-        it('should throw a BadRequestError for new users', async() => {
+        it('should throw a BadRequestError for new users', async () => {
             vi.mocked(authRepo.findUniqueUser).mockResolvedValue(null)
 
             await expect(service.signin(mockedSignupUser)).rejects.toThrow("User not found")
@@ -197,7 +197,7 @@ describe('Testing the auth service', () => {
             expect(authRepo.findUniqueUser).toHaveBeenCalledWith(mockedSignupUser.email, mockedEnv.DATABASE_URL)
         })
 
-        it('should throw ValidationError is the password does not matched with the stored password', async() => {
+        it('should throw ValidationError is the password does not matched with the stored password', async () => {
             vi.mocked(authRepo.findUniqueUser).mockResolvedValue(mockedExistingUser)
             vi.mocked(hashUtil.compareHash).mockResolvedValue(false)
 

@@ -38,7 +38,6 @@ async function hashPassword(password: string): Promise<string> {
     const hashBytesToHashHex = Array.from(hashArray)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('')
-    console.log("hash array from create hash", hashArray)
     //Converting the salt to hex for storage
     const saltBytesToSaltHex = Array.from(salt)
         .map(s => s.toString(16).padStart(2, '0'))

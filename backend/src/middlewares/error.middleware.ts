@@ -1,5 +1,6 @@
 import { Context, Next } from "hono";
 import { AppError, NotFoundError } from "../errors/app-error";
+import { sanitizeObject, sanitizeText } from "../utils/sanitize";
 
 
 export async function handleErrorMiddleware
@@ -8,11 +9,12 @@ export async function handleErrorMiddleware
 //    await next();
 // } catch (error) {
        if(error instanceof AppError){
+        const safeMeta = error.meta ? sanitizeObject(error.meta) : null
         return c.json({
             error: {
                 code: error.errorCode,
                 message: error.message,
-                meta: error.meta || null,
+                meta: safeMeta || null,
                 timestamp: error.timestamp,
                 isOperational: error.isOperational,
                 severityLevel : error.severityLevel,

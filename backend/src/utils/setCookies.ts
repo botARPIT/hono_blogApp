@@ -7,14 +7,15 @@ function setCookies(c:Context, token: Token){
     setCookie(c, "access_token", accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'None',
+        sameSite: 'Strict',
+        path: '/',
         maxAge: 60 * 60 
     })
-    console.log("Inside set cookies")
     setCookie(c, "refresh_token", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'None',
+        sameSite: 'Strict',
+        path: '/',
         maxAge: 60 * 60 * 24 * 2
     })
 }

@@ -1,41 +1,49 @@
-import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog } from "../repositories/blog.repository";
-import { Bindings, EnvironmentVariables } from "../types/env.types";
+import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog, getUserBlogs } from "../repositories/blog.repository";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 import { NotFoundError } from "../errors/app-error";
+import { AppConfig } from "../config";
 
 class BlogService {
-    constructor(private env : EnvironmentVariables) {}
-    async addBlog(dto: AddBlogDTO, userId: string): Promise<CreatedBlogDTO>{
-       return await createBlog(dto, userId, this.env.DATABASE_URL)
+    constructor(private env: AppConfig) { }
+    async addBlog(dto: AddBlogDTO, userId: string): Promise<CreatedBlogDTO> {
+        return await createBlog(dto, userId, this.env.DATABASE_URL)
 
-         
+
     }
 
-    async update(dto: UpdateBlogDTO, blogId: string, authorId: string) : Promise<UpdateBlogDTO>{
+    async update(dto: UpdateBlogDTO, blogId: string, authorId: string): Promise<UpdateBlogDTO> {
         return await updateBlog(dto, blogId, authorId, this.env.DATABASE_URL)
 
     }
 
-    async getBlogs(page: number) : Promise<GetBlogDTO[] > {
+    async getBlogs(page: number): Promise<GetBlogDTO[]> {
         const result = await getAllBlogs(page, this.env.DATABASE_URL)
-        if(!result.length) throw new NotFoundError("Cannot find blogs")
+        if (!result.length) throw new NotFoundError("Cannot find blogs")
         else return result
 
     }
 
-    async delete(id: string, authorId: string): Promise<DeletedBlogDTO>{
+    async delete(id: string, authorId: string): Promise<DeletedBlogDTO> {
         return await deleteBlog(id, authorId, this.env.DATABASE_URL)
-      
+
     }
 
-    async getBlog(id: string) : Promise<GetBlogDTO>{ 
-       const result = await getBlogById(id, this.env.DATABASE_URL)
-      if(result == null) throw new NotFoundError("Blog not found")
+    async getUserBlogs(userId: string): Promise<GetBlogDTO[]> {
+        const blogs = await getUserBlogs(userId, this.env.DATABASE_URL)
+        if (!blogs || blogs.length === 0) throw new NotFoundError("No blogs found for this user")
+        return blogs
+    }
+
+
+    async getBlog(id: string): Promise<GetBlogDTO> {
+        const result = await getBlogById(id, this.env.DATABASE_URL)
+        if (result == null) throw new NotFoundError("Blog not found")
+        //@ts-ignore
         else return result
     }
 }
 
 //factory function
-export function createBlogService(env: EnvironmentVariables){
+export function createBlogService(env: AppConfig) {
     return new BlogService(env)
 }

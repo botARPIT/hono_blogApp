@@ -10,6 +10,8 @@
   "dependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.57",
     "@hono-rate-limiter/cloudflare": "^0.2.2",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.2.0",
     "@prisma/client": "^6.11.1",
     "@prisma/extension-accelerate": "^2.0.2",
     "@supabase/supabase-js": "^2.52.1",
@@ -21,7 +23,7 @@
     "hono": "^4.8.5",
     "hono-rate-limiter": "^0.4.2",
     "jsonwebtoken": "^9.0.2",
-    "zod": "^3.25.75"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/argon2-browser": "^1.18.4",

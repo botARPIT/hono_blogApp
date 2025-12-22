@@ -1,15 +1,16 @@
-import {  ServiceName } from './../errors/app-error';
+import { ServiceName } from './../errors/app-error';
 
 import { NotFoundError, ValidationError } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
 import { Bindings } from "../types/env.types";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 import { prismaErrorObject, prismaErrorWrapper } from '../errors/prismaErrorWrapper';
+import { AppConfig } from '../config';
 
 
 
 
-export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<CreatedBlogDTO> {
+export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: AppConfig['DATABASE_URL']): Promise<CreatedBlogDTO> {
 
     try {
         const prisma = getPrismaClient(dbUrl)
@@ -19,7 +20,8 @@ export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Binding
                 content: dto.content,
                 thumbnail: dto.thumbnail,
                 authorId: userId,
-                tag: dto.tag
+                tag: dto.tag,
+                published: dto.published || false
             },
             select: {
                 id: true,
@@ -29,6 +31,8 @@ export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Binding
                 thumbnail: true,
                 authorId: true,
                 createdAt: true,
+                updatedAt: true,
+                like: true,
                 published: true,
 
             }
@@ -39,9 +43,9 @@ export async function createBlog(dto: AddBlogDTO, userId: string, dbUrl: Binding
     }
 }
 
-export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<UpdateBlogDTO> {
+export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: string, dbUrl: AppConfig['DATABASE_URL']): Promise<UpdateBlogDTO> {
     try {
-       
+
         const prisma = getPrismaClient(dbUrl)
 
         const updateData = Object.fromEntries(Object.entries(dto).filter(([_, v]) => v !== undefined))
@@ -58,11 +62,14 @@ export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: s
     }
 }
 
-export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO[]> {
+export async function getAllBlogs(page: number, dbUrl: AppConfig['DATABASE_URL']): Promise<GetBlogDTO[]> {
     try {
         { !page || page < 0 ? page = 1 : page }
         const prisma = getPrismaClient(dbUrl)
         const allBlogs = await prisma.blog.findMany({
+            where: {
+                published: true
+            },
             orderBy: { updatedAt: 'desc' },
             skip: (page - 1) * 10,
             take: 10,
@@ -70,11 +77,11 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
                 id: true,
                 title: true,
                 content: true,
-                // thumbnail: true,
-                // authorId: true,
                 tag: true,
                 createdAt: true,
+                updatedAt: true,
                 like: true,
+                published: true,
                 author: {
                     select: {
                         name: true
@@ -93,7 +100,37 @@ export async function getAllBlogs(page: number, dbUrl: Bindings["DATABASE_URL"])
     }
 }
 
-export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<DeletedBlogDTO> {
+export async function getUserBlogs(userId: string, dbUrl: AppConfig['DATABASE_URL']): Promise<GetBlogDTO[]> {
+    try {
+        const prisma = getPrismaClient(dbUrl)
+        const blogs = await prisma.blog.findMany({
+            where: {
+                authorId: userId
+            },
+            orderBy: { updatedAt: 'desc' },
+            select: {
+                id: true,
+                title: true,
+                content: true,
+                tag: true,
+                createdAt: true,
+                updatedAt: true,
+                like: true,
+                published: true,
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        })
+        return blogs
+    } catch (error) {
+        throw prismaErrorWrapper(error as prismaErrorObject)
+    }
+}
+
+export async function deleteBlog(id: string, authorId: string, dbUrl: AppConfig['DATABASE_URL']): Promise<DeletedBlogDTO> {
     try {
         const prisma = getPrismaClient(dbUrl)
         const deletedBlog = await prisma.blog.delete({
@@ -108,7 +145,7 @@ export async function deleteBlog(id: string, authorId: string, dbUrl: Bindings["
     }
 }
 
-export async function getBlogById(id: string, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO | null> {
+export async function getBlogById(id: string, dbUrl: AppConfig['DATABASE_URL']): Promise<GetBlogDTO | null> {
     try {
         const start = performance.now()
         const prisma = getPrismaClient(dbUrl)
@@ -124,22 +161,23 @@ export async function getBlogById(id: string, dbUrl: Bindings["DATABASE_URL"]): 
                 thumbnail: true,
                 authorId: true,
                 createdAt: true,
+                updatedAt: true,
                 like: true,
+                published: true,
                 author: {
                     select: {
                         name: true
                     }
                 }
             },
-    
+
             cacheStrategy: {
-                ttl: 600, 
+                ttl: 600,
                 tags: [`single_blog`]
             }
         })
         return blog
     } catch (error) {
-          console.log(error)
         throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }

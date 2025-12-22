@@ -7,7 +7,6 @@ import { Result } from "../types/result.type";
 class StrictBlogPolicy implements AddBlogPolicy<AddBlogDTO>, UpdateBlogPolicy<UpdateBlogDTO>{
     validateAddBlog(dto: AddBlogDTO) : Result<AddBlogDTO, ValidationError>{
         const result = blogSchema.safeParse(dto)
-        console.log(result.error)
         if(result.success)  return {success: true, data: result.data}
         else return {success: false, error : result.error}
         

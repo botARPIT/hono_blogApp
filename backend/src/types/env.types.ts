@@ -5,7 +5,8 @@ export type Bindings = {
    GOOGLE_CLIENT_ID: string,
    GOOGLE_CLIENT_SECRET: string,
    REDIRECT_URI: string,
-   RATE_LIMIT_KV: string
+   FRONTEND_REDIRECT_URL: string,
+   RATE_LIMIT_KV: KVNamespace<string>
    // SUPABASE_URL: string,
    // SUPABASE_SERVICE_ROLE_KEY: string
 }
@@ -16,6 +17,7 @@ export interface EnvironmentVariables {
    JWT_REFRESH_SECRET: string,
    GOOGLE_CLIENT_ID: string,
    GOOGLE_CLIENT_SECRET: string,
-    REDIRECT_URI: string,
-   RATE_LIMIT_KV: string
+   REDIRECT_URI: string,
+   FRONTEND_REDIRECT_URL: string,
+   RATE_LIMIT_KV: KVNamespace<string>
 }

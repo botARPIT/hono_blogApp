@@ -24,7 +24,7 @@ export const uploadFile = async (file: string, folderLocation: FolderLocation, u
     if (!supabase) return new DBError("Unable to get supabase client", { message: "Unable to connect to storage, try after sometime" })
     const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(fileName, decode(file), { contentType: 'image/jpeg', upsert: upsertValue })
     if (error) {
-        console.log(error)
+        // console.log(error)
         throw new DBError("Failed to upload file", { message: "Unable to upload file, try again after sometime" })
     }
 

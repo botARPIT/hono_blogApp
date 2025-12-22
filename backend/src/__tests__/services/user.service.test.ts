@@ -17,10 +17,10 @@ describe('Tests for user service', () => {
         REDIRECT_URI: "abc",
         RATE_LIMIT_KV: "abc"
     }
-     beforeEach(() => {
+    beforeEach(() => {
         vi.clearAllMocks()
     })
-     const service = createUserService(mockedEnv)
+    const service = createUserService(mockedEnv)
     describe("tests for getProfileInfo method", () => {
         it('should return the user profile', async () => {
             const mockedUserDetails = {
@@ -29,22 +29,22 @@ describe('Tests for user service', () => {
                 createdAt: new Date()
             }
             vi.mocked(userRepo.getUserProfile).mockResolvedValue(mockedUserDetails)
-           
+
             const result = await service.getProfileInfo("123")
             expect(result).toEqual(mockedUserDetails)
             expect(userRepo.getUserProfile).toHaveBeenCalledWith("123", mockedEnv.DATABASE_URL)
         })
 
-        it('should throw an NotFound Error if user not found', async() => {
+        it('should throw an NotFound Error if user not found', async () => {
             vi.mocked(userRepo.getUserProfile).mockResolvedValue(null)
-             await expect(service.getProfileInfo('user123')).rejects.toThrow("Unable to find the user")
-             await expect(service.getProfileInfo('user123')).rejects.toBeInstanceOf(AppError)
+            await expect(service.getProfileInfo('user123')).rejects.toThrow("Unable to find the user")
+            await expect(service.getProfileInfo('user123')).rejects.toBeInstanceOf(AppError)
             expect(userRepo.getUserProfile).toHaveBeenCalledWith("user123", mockedEnv.DATABASE_URL)
         })
     })
 
     describe('tests for getUser blogs method', () => {
-        it('should return user blogs', async() => {
+        it('should return user blogs', async () => {
             const mockedUserBlogs = [{
                 id: '1',
                 title: 'This is test title',
@@ -52,7 +52,7 @@ describe('Tests for user service', () => {
                 createdAt: new Date(),
                 tag: BlogTag.GAMING,
                 like: 2
-            },{
+            }, {
                 id: '2',
                 title: 'This is test title2',
                 content: 'This is test content2',
@@ -67,7 +67,7 @@ describe('Tests for user service', () => {
             expect(userRepo.getUserBlogs).toHaveBeenCalledWith('user123', mockedEnv.DATABASE_URL)
         })
 
-        it('should throw NotFound Error if user has no blogs', async() => {
+        it('should throw NotFound Error if user has no blogs', async () => {
             vi.mocked(userRepo.getUserBlogs).mockResolvedValue(null)
             await expect(service.getBlogs('user445')).rejects.toThrow("No blogs found for the user")
             await expect(service.getBlogs('user445')).rejects.toBeInstanceOf(AppError)

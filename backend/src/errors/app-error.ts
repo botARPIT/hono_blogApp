@@ -10,7 +10,8 @@ export enum ErrorCode {
     INTERNAL_ERROR = "INTERNAL ERROR",
     ZOD_ERROR = "ZOD_ERROR",
     DB_ERROR = "DB_ERROR",
-    AUTH_ERROR = "AUTH_ERROR"
+    AUTH_ERROR = "AUTH_ERROR",
+    CONFIG_ERROR = "CONFIG_ERROR"
 }
 
 
@@ -91,5 +92,11 @@ export class AuthError extends AppError{
 export class DBError extends AppError {
     constructor(message: string , meta: Record<string, any>) {
         super(message, 400, ErrorCode.DB_ERROR, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.DB)
+    }
+}
+
+export class ConfigError extends AppError {
+    constructor(message: string = "Configuration Error", meta?: Record<string, any>) {
+        super(message, 500, ErrorCode.CONFIG_ERROR, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.ROUTER)
     }
 }

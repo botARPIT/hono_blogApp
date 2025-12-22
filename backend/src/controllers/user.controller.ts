@@ -1,28 +1,29 @@
 import { Context } from "hono";
 import { createUserService } from "../services/user.service";
-
-import { userInputPolicy } from "../policies/user.policy";
-import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
-import { ZodValidationError } from "../errors/app-error";
-import { setCookies } from "../utils/setCookies";
+import { updateProfileSchema } from "../types/user.types";
+import { BadRequestError, ServiceName, ZodValidationError } from "../errors/app-error";
 
 class UserController {
     constructor(private userService: ReturnType<typeof createUserService>) { }
     async getProfileInfo(c: Context) {
         const { id: userId } = c.get('jwtPayload')
-        console.log("user id", userId)
-        if (!userId) return c.json({ message: "Unable to find the id, kindly provide user id" })
+        if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER)
         const userProfile = await this.userService.getProfileInfo(userId)
-        console.log(userProfile)
         return c.json({ userProfile: userProfile })
     }
 
-    async getUserBlogs(c: Context){
-        const {id: userId} = c.get('jwtPayload')
-        if(!userId) return c.json({message: "Unable to find user id"})
-        const userBlogs = await this.userService.getBlogs(userId)
-        if(userBlogs === null) return c.json({message: "You haven't posted any blog, kindly write one"})
-        return c.json({blogs: userBlogs})
+    async updateProfile(c: Context) {
+        const { id: userId } = c.get('jwtPayload')
+        if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER)
+
+        const body = await c.req.json()
+        const parsed = updateProfileSchema.safeParse(body)
+        if (!parsed.success) {
+            throw new ZodValidationError("Invalid input", { message: parsed.error })
+        }
+
+        const result = await this.userService.updateProfile(userId, parsed.data)
+        return c.json(result)
     }
 
 }

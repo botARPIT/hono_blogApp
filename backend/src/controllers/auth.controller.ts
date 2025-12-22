@@ -7,10 +7,13 @@ import { getCookie } from "hono/cookie";
 import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
 import { userInputPolicy } from "../policies/user.policy";
 import { ZodValidationError } from "../errors/app-error";
+import { sanitizeText } from "../utils/sanitize";
+
+
+
 
 class AuthController {
     constructor(private authService: ReturnType<typeof createAuthService>) { }
-
     async getAuthResponse(c: Context) {
         const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = c.env
         const code = c.req.query('code');
@@ -27,7 +30,7 @@ class AuthController {
     }
 
     async generateRefreshToken(c: Context) {
-        const refreshToken = getCookie(c, "refreshToken")
+        const refreshToken = getCookie(c, "refresh_token")
         if (!refreshToken) return c.json({ message: "Unauthorized" }, 401)
         return this.authService.getRefreshToken(c, refreshToken)
     }
@@ -35,7 +38,6 @@ class AuthController {
     async signup(c: Context) {
         const body = await c.req.json<UserSignUpDTO>();
         const inputValidation = userInputPolicy.validateSignUp(body)
-        console.log("input validation",inputValidation)
         if (!inputValidation.success) throw new ZodValidationError("Zod validation failed", { message: inputValidation.error })
         const result = await this.authService.signup(inputValidation.data)
         setCookies(c, result)
@@ -46,9 +48,8 @@ class AuthController {
     async signin(c: Context) {
         const body = await c.req.json<UserSignInDTO>()
         const inputValidation = userInputPolicy.validateSignIn(body)
-        console.log(inputValidation)
         if (!inputValidation.success) {
-            throw new ZodValidationError("Validation error", {field: "Incorrect email/password", message: "Password should be of minimum 8 of characters"},)
+            throw new ZodValidationError("Validation error", { field: "Incorrect email/password", message: "Password should be of minimum 8 of characters" },)
         }
         const result = await this.authService.signin(inputValidation.data)
         setCookies(c, result)

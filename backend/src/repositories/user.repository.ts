@@ -3,14 +3,15 @@ import { UserDetailsDTO } from "../types/user.types";
 import { prismaErrorObject, prismaErrorWrapper } from "../errors/prismaErrorWrapper";
 import { Bindings } from "../types/env.types";
 import { GetBlogDTO } from "../types/blog.types";
+import { AppConfig } from "../config";
 
-export async function getUserProfile(id: string, dbUrl: string): Promise<UserDetailsDTO | null>{
+export async function getUserProfile(id: string, dbUrl: AppConfig['DATABASE_URL']): Promise<UserDetailsDTO | null> {
     const prisma = getPrismaClient(dbUrl)
     try {
         const user = await prisma.user.findUnique({
             where: {
-               id
-            }, 
+                id
+            },
             select: {
                 id: true,
                 name: true,
@@ -18,44 +19,31 @@ export async function getUserProfile(id: string, dbUrl: string): Promise<UserDet
                 createdAt: true
             }
         })
-        if(!user) return null 
-         return user 
-    } catch (error) {
-         throw prismaErrorWrapper(error as prismaErrorObject)
-    }
-}
-
-
-export async function getUserBlogs(userId: string, dbUrl: Bindings["DATABASE_URL"]): Promise<GetBlogDTO[] | null>{
-    try {
-        let page = 1
-    { !page ? page = 1 : page }
-    const prisma = getPrismaClient(dbUrl)
-    const blogs = await prisma.blog.findMany({
-        orderBy: { updatedAt: 'desc' },
-            skip: (page - 1) * 10,
-            take: 10,
-        where: {
-            authorId: userId
-        },select: {
-            id: true,
-            title: true,
-            content: true,
-            createdAt: true,
-            like: true,
-            tag: true,
-            author: {
-                select: {
-                    name: true
-                }
-            }
-        }
-    })
-
-    if(blogs.length === 0) return null
-    return blogs
+        if (!user) return null
+        return user
     } catch (error) {
         throw prismaErrorWrapper(error as prismaErrorObject)
     }
+}
 
+export async function updateProfile(id: string, data: { name?: string, email?: string }, dbUrl: AppConfig['DATABASE_URL']): Promise<UserDetailsDTO> {
+    const prisma = getPrismaClient(dbUrl)
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { id },
+            data: {
+                name: data.name,
+                email: data.email
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                createdAt: true
+            }
+        })
+        return updatedUser
+    } catch (error) {
+        throw prismaErrorWrapper(error as prismaErrorObject)
+    }
 }
