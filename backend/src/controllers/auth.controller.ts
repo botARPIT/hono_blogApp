@@ -15,18 +15,19 @@ import { sanitizeText } from "../utils/sanitize";
 class AuthController {
     constructor(private authService: ReturnType<typeof createAuthService>) { }
     async getAuthResponse(c: Context) {
-        const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = c.env
-        const code = c.req.query('code');
+        const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URI } = c.env
+        const { code, state } = c.req.query();
         if (!code) return c.json({ message: "Missing code" }, 400)
-        const response = await fetchTokenFromGoogle(code, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) as GoogleAuthResponse;
-        const { access_token } = response
-        // const accessToken = access_token
-        // const refreshToken = refresh_token
-        // const token : Token = {accessToken, refreshToken}
-        const result = await this.authService.auth(access_token)
+        const storedState = getCookie(c, "oauth_state")
+        if (!storedState) return c.json({ message: "Missing state" }, 400)
+        if (state !== storedState) return c.json({ message: "Invalid state" }, 400)
+        const codeVerifier = getCookie(c, "code_verifier")
+        if (!codeVerifier) return c.json({ message: "Missing code verifier" }, 400)
+        const response = await fetchTokenFromGoogle(code, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, codeVerifier, REDIRECT_URI) as GoogleAuthResponse;
+        const { id_token } = response
+        if (!id_token) return c.json({ message: "Failed to get ID token from Google" }, 400)
+        const result = await this.authService.authUsingGoogle(id_token)
         setCookies(c, result)
-        // const userId = await jwtVerify(id_token, GOOGLE_CLIENT_SECRET)
-        // console.log(userId)
     }
 
     async generateRefreshToken(c: Context) {

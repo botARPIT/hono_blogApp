@@ -58,6 +58,24 @@ class BlogController {
         const result = await this.blogService.getUserBlogs(userId)
         return c.json(result)
     }
+
+    async likeBlog(c: Context) {
+        const blogId = c.req.param('id')
+        const { id: userId } = c.get('jwtPayload')
+        if (!blogId) throw new BadRequestError("Blog id missing", ServiceName.CONTROLLER, { message: "Kindly provide blog id" })
+        if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER, { message: "Authentication required" })
+        const result = await this.blogService.like(blogId, userId)
+        return c.json(result)
+    }
+
+    async checkLikeStatus(c: Context) {
+        const blogId = c.req.param('id')
+        const { id: userId } = c.get('jwtPayload')
+        if (!blogId) throw new BadRequestError("Blog id missing", ServiceName.CONTROLLER, { message: "Kindly provide blog id" })
+        if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER, { message: "Authentication required" })
+        const hasLiked = await this.blogService.hasUserLikedBlog(blogId, userId)
+        return c.json({ hasLiked })
+    }
 }
 // factory function
 export function createBlogController(obj: ReturnType<typeof createBlogService>) {

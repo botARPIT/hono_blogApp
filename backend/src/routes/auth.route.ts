@@ -1,6 +1,7 @@
 
 import { Bindings } from './../types/env.types';
 import { Hono } from "hono";
+import crypto from "crypto";
 import { fetchTokenFromGoogle } from '../auth/auth';
 import { GoogleAuthResponse } from '../types/auth.types';
 import { Token } from '../types/jwt.types';
@@ -13,6 +14,7 @@ import { deleteCookie } from 'hono/cookie';
 import { getConfig } from '../config'
 import { rateLimiter } from 'hono-rate-limiter';
 import { WorkersKVStore } from '@hono-rate-limiter/cloudflare';
+import { generateCodeChallenge, generateCodeVerifier, setPKCECookies } from '../utils/pkce';
 const authRouter = new Hono<{ Bindings: Bindings }>()
 
 // Rate limitter for auth routes
@@ -27,22 +29,40 @@ const authRouter = new Hono<{ Bindings: Bindings }>()
 //    })(c, next)
 // })
 
-authRouter.get('/callback/google', async (c) => {
-   const config = getConfig(c.env)
-   if (!c.env) { return c.json({ message: "Server configuration error" }, 500) }
-   const authService = createAuthService(config)
-   const authController = createAuthController(authService)
-   await authController.getAuthResponse(c)
-   return c.redirect(config.FRONTEND_REDIRECT_URL)
-
+authRouter.get('/google/callback', async (c) => {
+   try {
+      const config = getConfig(c.env)
+      if (!c.env) { return c.json({ message: "Server configuration error" }, 500) }
+      const authService = createAuthService(config)
+      const authController = createAuthController(authService)
+      const result = await authController.getAuthResponse(c)
+      // If controller returned a response (error), return it
+      if (result) return result
+      // Otherwise redirect to frontend
+      return c.redirect(config.FRONTEND_REDIRECT_URL)
+   } catch (error) {
+      console.error("OAuth callback error:", error)
+      return c.json({ message: "OAuth authentication failed", error: String(error) }, 500)
+   }
 })
 
 authRouter.get('/google', async (c) => {
+   // Generate PKCE code verifier and challenge
+   const codeVerifier = generateCodeVerifier()
+   const codeChallenge = await generateCodeChallenge(codeVerifier)
+   const state = crypto.randomUUID()
+
+   // Store code_verifier and state in cookies for callback verification
+   setPKCECookies(c, codeVerifier, state)
+
    const params = new URLSearchParams({
       client_id: c.env.GOOGLE_CLIENT_ID,
       redirect_uri: c.env.REDIRECT_URI,
       response_type: "code",
-      scope: "email profile"
+      scope: "openid email profile",
+      code_challenge_method: "S256",
+      code_challenge: codeChallenge,
+      state
    })
    const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
    return c.redirect(url)
@@ -61,7 +81,6 @@ authRouter.get('/refresh', async (c) => {
 
 authRouter.post('/signup', async (c) => {
    try {
-      // const dbUrl = c.env.DATABASE_URL;
       const config = getConfig(c.env)
       if (!c.env) return c.json({ message: "Server configuration error" }, 503)
 

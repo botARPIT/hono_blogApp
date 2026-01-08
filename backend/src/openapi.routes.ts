@@ -152,7 +152,7 @@ const logoutRoute = createRoute({
 
 const googleCallbackRoute = createRoute({
     method: 'get',
-    path: '/api/v1/auth/callback/google',
+    path: '/api/v1/auth/google/callback',
     tags: ['Authentication'],
     responses: {
         302: {

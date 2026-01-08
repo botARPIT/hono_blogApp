@@ -1,6 +1,23 @@
 
 import { z } from "zod";
-import { BlogTag } from "@prisma/client/edge";
+
+// BlogTag enum matching schema.prisma
+export enum BlogTag {
+    SOCIAL = "SOCIAL",
+    TECH = "TECH",
+    ENTERTAINMENT = "ENTERTAINMENT",
+    INFOTAINMENT = "INFOTAINMENT",
+    SPORTS = "SPORTS",
+    MOVIES = "MOVIES",
+    GAMING = "GAMING",
+    PHILOSOPHY = "PHILOSOPHY",
+    SCIENCE = "SCIENCE",
+    ART = "ART",
+    NATURE = "NATURE",
+    WILDLIFE = "WILDLIFE",
+    GENERAL = "GENERAL"
+}
+
 type BlogDTO = {
     id: string,
     title: string,
@@ -13,22 +30,6 @@ type BlogDTO = {
     like: number,
     published: boolean
 }
-
-//  export enum BlogTag {
-//     SOCIAL = "SOCIAL",
-//     TECH = "TECH",
-//     ENTERTAINMENT = "ENTERTAINMENT",
-//     INFOTAINMENT = "INFOTAINMENT",
-//     SPORTS = "SPORTS",
-//     MOVIES = "MOVIES",
-//     GAMING = "GAMING",
-//     PHILOSOPHY = "PHILOSOPHY",
-//     SCIENCE = "SCIENCE",
-//     ART = "ART",
-//     NATURE = "NATURE",
-//     WILDLIFE = "WILDLIFE",
-//     GENERAL = "GENERAL"
-// }
 
 export type AddBlogDTO = Pick<BlogDTO, 'title' | 'content' | 'thumbnail' | 'tag' | 'published'>
 export type CreatedBlogDTO = Omit<BlogDTO, 'updatedAt' | 'like'>

@@ -88,6 +88,30 @@ blogRouter.get("/my-blogs", async (c) => {
    }
 })
 
+blogRouter.post("/like/:id", async (c) => {
+   try {
+      const config = getConfig(c.env)
+      if (!c.env) return c.json({ message: "Server configuration error" }, 500)
+      const service = createBlogService(config)
+      const controller = createBlogController(service)
+      return await controller.likeBlog(c)
+   } catch (error) {
+      return handleError(c, error)
+   }
+})
+
+blogRouter.get("/like-status/:id", async (c) => {
+   try {
+      const config = getConfig(c.env)
+      if (!c.env) return c.json({ message: "Server configuration error" }, 500)
+      const service = createBlogService(config)
+      const controller = createBlogController(service)
+      return await controller.checkLikeStatus(c)
+   } catch (error) {
+      return handleError(c, error)
+   }
+})
+
 // blogRouter.post("/uploadImage", async (c) => {
 //    console.log("request received")
 //    const base64 = await c.req.text()

@@ -15,16 +15,27 @@ import { bodyLimit } from 'hono/body-limit'
 
 import { rateLimiter } from 'hono-rate-limiter'
 import { WorkersKVStore } from "@hono-rate-limiter/cloudflare"
-import { ACCEPTED_FRONTEND_ORIGIN } from '../config';
+import { getAllowedOrigins } from '../config';
 const mainRouter = new Hono<{ Bindings: Bindings }>();
 
 mainRouter.use("*", secureHeaders())
-mainRouter.use("*", csrf({ origin: ACCEPTED_FRONTEND_ORIGIN }))
+
+// CSRF protection - dynamically configure origins based on environment
+mainRouter.use("*", (c, next) => {
+    const origins = getAllowedOrigins(c.env)
+    return csrf({ origin: origins })(c, next)
+})
+
 mainRouter.use("*", bodyLimit({ maxSize: 1024 * 1024 }))
-// mainRouter.use("/*", cors({
-//     origin: [ACCEPTED_FRONTEND_ORIGIN,
-//         "http://localhost:5173"],
-// }))
+
+// CORS middleware - dynamically configure origins based on environment
+mainRouter.use("/*", (c, next) => {
+    const origins = getAllowedOrigins(c.env)
+    return cors({
+        origin: origins,
+        credentials: true,
+    })(c, next)
+})
 
 //Rate limiting
 mainRouter.use((c: Context, next: Next) =>

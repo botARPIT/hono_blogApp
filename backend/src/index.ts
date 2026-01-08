@@ -1,17 +1,21 @@
 import { Hono } from 'hono'
 import mainRouter from './routes'
 import { cors } from 'hono/cors'
-import { ACCEPTED_FRONTEND_ORIGIN } from './config'
+import { getAllowedOrigins } from './config'
 import docsApp from './openapi.routes'
+import { Bindings } from './types/env.types'
 
 
-const app = new Hono()
+const app = new Hono<{ Bindings: Bindings }>()
 
-app.use("/*", cors({
-    origin: [ACCEPTED_FRONTEND_ORIGIN,
-        "http://localhost:5173"],
-    credentials: true
-}))
+// CORS middleware - origins determined by environment
+app.use("/*", (c, next) => {
+    const origins = getAllowedOrigins(c.env)
+    return cors({
+        origin: origins,
+        credentials: true
+    })(c, next)
+})
 
 app.route("/", mainRouter)
 app.route("/docs", docsApp)

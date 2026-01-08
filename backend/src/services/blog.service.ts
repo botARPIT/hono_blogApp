@@ -1,4 +1,4 @@
-import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog, getUserBlogs } from "../repositories/blog.repository";
+import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog, getUserBlogs, likeBlog, hasUserLikedBlog } from "../repositories/blog.repository";
 import { AddBlogDTO, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 import { NotFoundError } from "../errors/app-error";
 import { AppConfig } from "../config";
@@ -38,8 +38,15 @@ class BlogService {
     async getBlog(id: string): Promise<GetBlogDTO> {
         const result = await getBlogById(id, this.env.DATABASE_URL)
         if (result == null) throw new NotFoundError("Blog not found")
-        //@ts-ignore
         else return result
+    }
+
+    async like(blogId: string, userId: string): Promise<{ like: number; hasLiked: boolean }> {
+        return await likeBlog(blogId, userId, this.env.DATABASE_URL)
+    }
+
+    async hasUserLikedBlog(blogId: string, userId: string): Promise<boolean> {
+        return await hasUserLikedBlog(blogId, userId, this.env.DATABASE_URL)
     }
 }
 

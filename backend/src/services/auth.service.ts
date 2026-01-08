@@ -1,8 +1,6 @@
 
-import { AppError, AuthError, BadRequestError, ErrorCode, NotFoundError, ServiceName, SeverityLevel, ValidationError } from "../errors/app-error";
+import { AppError, AuthError, BadRequestError, ErrorCode, ServiceName, SeverityLevel, ValidationError } from "../errors/app-error";
 import { createUser, findUniqueUser } from "../repositories/auth.repository";
-import { GoogleUserDetails } from "../types/auth.types";
-import { EnvironmentVariables } from "../types/env.types";
 import { Token } from "../types/jwt.types";
 import { CreatedUserDTO, UserSignInDTO, UserSignUpDTO } from "../types/user.types";
 import { generateTokens, jwtVerify } from "../utils/jwt";
@@ -16,20 +14,34 @@ import { AppConfig } from "../config";
 class AuthService {
     constructor(private env: AppConfig) { }
 
-    async auth(accessToken: Token['accessToken']): Promise<Token> {
-        const getUserInfoFromGoogle = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-            headers: { Authorization: `Bearer ${accessToken}` }
-        })
-        if (!getUserInfoFromGoogle) throw new AuthError("Unable to get user info from Google", false, { message: "Check your internet connection and try again" })
-        const details = await getUserInfoFromGoogle.json() as GoogleUserDetails
-        if (!details) throw new NotFoundError("Unable to get user details", { message: "Try again with different email" })
-        const existingUser = await findUniqueUser(details.email, this.env.DATABASE_URL)
+    async authUsingGoogle(idToken: string): Promise<Token> {
+        // Decode ID token to extract user info (it's a JWT)
+        // ID token structure: header.payload.signature (base64url encoded)
+        const tokenParts = idToken.split('.')
+        if (tokenParts.length !== 3) {
+            throw new AuthError("Invalid ID token format", false, { message: "Authentication failed" })
+        }
+
+        // Decode the payload (second part of the JWT)
+        const payload = JSON.parse(atob(tokenParts[1].replace(/-/g, '+').replace(/_/g, '/')))
+
+        // Extract user details from ID token claims
+        const { sub, email, name } = payload as { sub: string; email: string; name: string }
+
+        if (!email) {
+            throw new AuthError("Email not found in ID token", false, { message: "Please ensure you've granted email permission" })
+        }
+
+        const existingUser = await findUniqueUser(email, this.env.DATABASE_URL)
         if (existingUser) {
-            const { id, name } = existingUser
-            const token: Token = generateTokens({ id, name }, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
+            const { id, name: userName } = existingUser
+            const token: Token = generateTokens({ id, name: userName }, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
             return token
         }
-        const user = await createUser(details.name, details.email, null, this.env.DATABASE_URL, AuthProvider.GOOGLE)
+
+        // Use name from ID token, fallback to email prefix if not available
+        const userName = name || email.split('@')[0]
+        const user = await createUser(userName, email, null, this.env.DATABASE_URL, AuthProvider.GOOGLE)
         if (!user) throw new AppError("Unable to create user",
             500,
             ErrorCode.INTERNAL_ERROR,
@@ -38,9 +50,8 @@ class AuthService {
             SeverityLevel.HIGH,
             { message: "Kindly retry signing up" },
             ServiceName.BUSINESS)
-        const { id, name } = user
-        const payload = { id, name }
-        const token: Token = generateTokens(payload, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
+        const { id } = user
+        const token: Token = generateTokens({ id, name: userName }, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
         return token
     }
 
