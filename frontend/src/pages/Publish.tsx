@@ -1,86 +1,189 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Appbar from '../components/Appbar'
 import axios from 'axios'
 import { BACKEND_URL } from '../config'
-import { useState, type ChangeEvent } from 'react'
 import { toast } from 'sonner'
+import { RichTextEditor } from '../components/RichTextEditor'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import Appbar from '../components/Appbar'
+import { BlogTag, type BlogTag as BlogTagType } from '../types/blog'
+import { Save, Send } from 'lucide-react'
 
-export const Publish = () => {
-  const [title, setTitle] = useState<string>('')
-  const [content, setContent] = useState<string>('')
+const Publish = () => {
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [tag, setTag] = useState<BlogTagType>(BlogTag.GENERAL)
+  const [thumbnail, setThumbnail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [savingDraft, setSavingDraft] = useState(false)
   const navigate = useNavigate()
+
+  const validateForm = (isDraft: boolean = false) => {
+    if (!title.trim()) {
+      toast.error('Title is required')
+      return false
+    }
+
+    if (title.length < 10) {
+      toast.error('Title must be at least 10 characters')
+      return false
+    }
+
+    // For drafts, we only require title
+    if (isDraft) return true
+
+    if (!content.trim()) {
+      toast.error('Content is required')
+      return false
+    }
+
+    // Strip HTML tags for length validation
+    const textContent = content.replace(/<[^>]*>/g, '')
+    
+    if (textContent.length < 150) {
+      toast.error('Content must be at least 150 characters')
+      return false
+    }
+
+    return true
+  }
+
+  const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
+    e.preventDefault()
+    
+    if (!validateForm(asDraft)) return
+
+    const setLoadingState = asDraft ? setSavingDraft : setLoading
+    setLoadingState(true)
+
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/api/v1/blog/addBlog`,
+        { 
+          title, 
+          content: content || '<p>Draft content...</p>', 
+          thumbnail: thumbnail || 'https://via.placeholder.com/800x400', 
+          tag,
+          published: !asDraft
+        },
+        { withCredentials: true }
+      )
+      
+      if (asDraft) {
+        toast.success('Draft saved successfully! You can find it in My Blogs.')
+        navigate('/my-blogs')
+      } else {
+        toast.success('Blog published successfully!')
+        navigate(`/blog/${response.data.id}`)
+      }
+    } catch (error) {
+      const message = axios.isAxiosError(error) 
+        ? error.response?.data?.error?.message 
+        : asDraft ? 'Failed to save draft' : 'Failed to publish blog'
+      toast.error(message || (asDraft ? 'Failed to save draft' : 'Failed to publish blog'))
+    } finally {
+      setLoadingState(false)
+    }
+  }
+
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <Appbar />
-      <div>
-        <TextEditor
-          onTitleChange={e => setTitle(e.target.value)}
-          onContentChange={e => setContent(e.target.value)}
-        />
-      </div>
-      <div className='flex justify-center'>
-        <button
-          onClick={async (e) => {
-            try {
-              // if (!title.trim() || !content.trim()) {
-              //   toast.error('Title and content are required')
-              //   return
-              // }
-              e.preventDefault()
-              console.log(title)
-              console.log(content)
-              const response = await axios.post(
-                `${BACKEND_URL}/api/v1/blog/addBlog`,
-                {
-                  title,
-                  content,
-                  thumbnail: "url.com"
-                },
-                { withCredentials: true }
-              )
-              console.log(response)
-              toast.success('Blog added')
-              navigate(`/blog/${response.data.id}`)
-            } catch (error) {
-              toast.error('Failed to add the blog')
-              navigate(0)
-            }
-          }}
-          type='button'
-          className=' text-white bg-black hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-black font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2'
-        >
-          {'Publish'}
-        </button>
+      <div className="container mx-auto py-4 md:py-8 max-w-4xl px-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl md:text-3xl">Create New Blog</CardTitle>
+            <CardDescription>Share your thoughts with the world</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4 md:space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter blog title (min 10 characters)"
+                  required
+                  minLength={10}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tag">Category</Label>
+                <Select value={tag} onValueChange={(value) => setTag(value as BlogTagType)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.values(BlogTag) as BlogTagType[]).map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="thumbnail">Thumbnail URL (optional)</Label>
+                <Input
+                  id="thumbnail"
+                  value={thumbnail}
+                  onChange={(e) => setThumbnail(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  type="url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
+                <RichTextEditor
+                  content={content}
+                  onChange={setContent}
+                  placeholder="Write your blog content here..."
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={loading || savingDraft} 
+                  className="w-full sm:w-auto gap-2 cursor-pointer"
+                >
+                  <Send className="h-4 w-4" />
+                  {loading ? 'Publishing...' : 'Publish'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  disabled={loading || savingDraft}
+                  onClick={(e) => handleSubmit(e, true)}
+                  className="w-full sm:w-auto gap-2 cursor-pointer"
+                >
+                  <Save className="h-4 w-4" />
+                  {savingDraft ? 'Saving...' : 'Save as Draft'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => navigate('/blogs')} 
+                  className="w-full sm:w-auto cursor-pointer"
+                  disabled={loading || savingDraft}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
 }
 
-function TextEditor ({
-  onTitleChange,
-  onContentChange
-}: {
-  onTitleChange: (e: ChangeEvent<HTMLInputElement>) => void
-  onContentChange: (e: ChangeEvent<HTMLTextAreaElement>) => void
-}) {
-  return (
-    <div>
-      <div className='grid grid-cols-6 gap-2 grid-rows-8'>
-        <input
-          id='title'
-          type='text'
-          onChange={onTitleChange}
-          className='col-span-4 col-start-2 row-span-1 block mt-4 p-1 w-full text-lg text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-          placeholder='Enter the title for your blog..'
-        ></input>
-        <textarea
-          id='content'
-          rows={8}
-          onChange={onContentChange}
-          className='resize-none col-span-4 col-start-2 row-span-6 block mt-4 p-1 w-full text-lg text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-          placeholder='Add blog contents here..'
-        ></textarea>
-      </div>
-    </div>
-  )
-}
+export default Publish
+

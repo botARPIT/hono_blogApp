@@ -1,42 +1,69 @@
-import userProfile from '../assets/user_profile.png'
+import Avatar from './Avatar'
+import { Heart } from 'lucide-react'
+import { Badge } from './ui/badge'
 
-type BlogCardProps = {
+interface BlogCardProps {
   authorName: string
   title: string
   content: string
   createdAt: string
+  likes?: number
+  tag?: string
 }
-export default function BlogCard ({
+
+const BlogCard = ({
   authorName,
   title,
   content,
-  createdAt
-}: BlogCardProps) {
+  createdAt,
+  likes,
+  tag,
+}: BlogCardProps) => {
+  // Strip HTML tags and replace with spaces to prevent word joining
+  const plainText = content
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
   return (
-    <div className="border-b-2 border-slate-200 pb-2 mt-2 cursor-pointer">
-      <div className='flex'>
-        <div className='flex justify-center flex-col'>
-          <img
-            className='w-8 h-8 rounded-full'
-            src={userProfile}
-            alt='Rounded avatar'
-          ></img>
-        </div>
-        
-          <div className='font-extralight flex justify-center flex-col pl-2 text-sm '>
-            {authorName} 
-          </div>
-          <div className='ml-1 mt-3 w-2 h-2 bg-slate-500 border-2 border-white rounded-full'></div>
-          
-          <div className='font-thin flex justify-center flex-col pl-2 text-slate-600 text-sm '>{createdAt}</div>
-    
+    <div className="cursor-pointer border-b border-slate-200 p-4 transition-colors hover:bg-muted/50 md:p-6 dark:border-slate-700">
+      {/* Author info and metadata */}
+      <div className="mb-2 flex flex-wrap items-center gap-2 md:gap-3">
+        <Avatar prop={authorName} showLink={false} />
+        <span className="text-sm font-semibold text-foreground md:text-base">
+          {authorName}
+        </span>
+        <span className="text-muted-foreground/50">·</span>
+        <span className="text-xs text-muted-foreground md:text-sm">{createdAt}</span>
+        {tag && (
+          <>
+            <span className="text-muted-foreground/50">·</span>
+            <Badge variant="secondary" className="text-xs font-normal">
+              {tag}
+            </Badge>
+          </>
+        )}
       </div>
-      <div className='text-xl font-bold'>{title}</div>
-      <div className='text-md font-light'>{content.slice(0, 150) + ((content.length > 100 )? '...' : '')}</div>
-      <div className='text-slate-600 text-sm font-thin pt-2'>{`${Math.ceil(content.length / 200)} min read`}</div>
-      {/* <div>
-        <img className="h-auto max-w-lg ms-auto" src="/docs/images/examples/image-1@2x.jpg" alt="image description" />
-</div> */}
+
+      {/* Title */}
+      <h3 className="mb-2 text-lg font-bold text-foreground sm:text-xl md:text-2xl">
+        {title}
+      </h3>
+
+      {/* Content preview */}
+      <p className="line-clamp-3 text-sm font-normal text-muted-foreground md:text-base">
+        {plainText.slice(0, 200)}...
+      </p>
+
+      {/* Footer with likes */}
+      {likes !== undefined && (
+        <div className="mt-3 flex items-center gap-1.5 text-muted-foreground">
+          <Heart className="h-4 w-4" />
+          <span className="text-sm">{likes}</span>
+        </div>
+      )}
     </div>
   )
 }
+
+export default BlogCard

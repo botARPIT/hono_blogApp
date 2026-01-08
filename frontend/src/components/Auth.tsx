@@ -1,11 +1,17 @@
-import { useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from './Button'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import axios from 'axios'
 import { BACKEND_URL } from '../config'
-
 import { toast } from 'sonner'
 import { Login } from './Login'
+import { useAuth } from '../context/AuthContext'
+import { useRateLimit } from '../hooks/useRateLimit'
+import { AlertTriangle } from 'lucide-react'
+
 type UserAuthDTO = {
   name?: string
   email: string
@@ -14,123 +20,215 @@ type UserAuthDTO = {
 
 const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
   const navigate = useNavigate()
+  const { setUserName } = useAuth()
   const [postInputs, setPostInputs] = useState<UserAuthDTO>({
     name: '',
     email: '',
     password: ''
   })
-  
+  const [loading, setLoading] = useState(false)
 
-  async function sendRequest () {
+  // Rate limiting for auth attempts
+  const { 
+    isLocked, 
+    recordAttempt, 
+    resetAttempts, 
+    remainingAttempts,
+    getRemainingLockTime
+  } = useRateLimit(`auth_${type}`, {
+    maxAttempts: 5,
+    windowMs: 60000,      // 1 minute window
+    lockoutMs: 300000,    // 5 minute lockout
+  })
+
+  async function sendRequest() {
+    // Check rate limit first
+    if (isLocked) {
+      const remainingTime = getRemainingLockTime()
+      toast.error(`Too many attempts. Please try again in ${remainingTime} seconds.`)
+      return
+    }
+
+    if (!postInputs.email || !postInputs.password) {
+      toast.error('Email and password are required')
+      return
+    }
+
+    if (type === 'signup' && !postInputs.name) {
+      toast.error('Name is required')
+      return
+    }
+
+    // Record the attempt
+    if (!recordAttempt()) {
+      return // Rate limited
+    }
+
+    setLoading(true)
     try {
-     
-      await axios.post(`${BACKEND_URL}/api/v1/user/${type == "signup" ? "signup" : "signin"}`, postInputs, {
+      const response = await axios.post(`${BACKEND_URL}/api/v1/auth/${type === "signup" ? "signup" : "signin"}`, postInputs, {
         withCredentials: true
       })
-      // const jwt = response.data.accessToken
-      // localStorage.setItem('token', jwt)
       
-      toast.success(`${type == 'signup' ? "User created" : "Signed in"} successfully`)
+      // Reset rate limit on successful auth
+      resetAttempts()
+      
+      // Save user info and update context
+      let name = ''
+      if (type === 'signup' && postInputs.name) {
+        name = postInputs.name
+      } else if (response.data.name) {
+        name = response.data.name
+      } else if (response.data.user?.name) {
+        name = response.data.user.name
+      }
+      
+      if (name) {
+        setUserName(name)
+      }
+
+      toast.success(`${type === 'signup' ? "User created" : "Signed in"} successfully`)
       navigate('/blogs')
     } catch (error) {
-      toast.error(`Unable to ${type == 'signin' ? "sign in" : "sign up"}. Check your email/password`)
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error?.message
+        : `Unable to ${type === 'signin' ? "sign in" : "sign up"}. Check your email/password`
+      toast.error(message || `Unable to ${type === 'signin' ? "sign in" : "sign up"}. Check your email/password`)
+    } finally {
+      setLoading(false)
     }
   }
-  return (
-    <div className='h-screen flex justify-center flex-col'>
 
-      <div className='flex justify-center'>
-        <div>
-          <div className='px-12  '>
-            <div className='text-3xl font-bold'>
-              {type == 'signup' ? 'Create an account' : 'Login your account'}
-            </div>
-            <div className='text-md mt-2 text-slate-400'>
-              {type === 'signup'
-                ? 'Already have an account?'
-                : "Don't have an account"}
-              <Link
-                className='pl-2 underline'
-                to={type === 'signin' ? '/signup' : '/signin'}
-              >
-                {type == 'signin' ? 'Sign Up' : 'Sign In'}
-              </Link>
-            </div>
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading && !isLocked) {
+      sendRequest()
+    }
+  }
+
+  return (
+    <div className='h-screen flex justify-center items-center bg-background px-4'>
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-4">
+            <img src="/favicon.png" alt="Blogify Logo" className="h-12 w-12 rounded-lg" />
           </div>
-          <div>
-            {type == 'signup' ? (
-              <LabelledInput
-                label='Name'
-                placeholder='Enter your name'
+          <CardTitle className="text-3xl text-center">
+            {type === 'signup' ? 'Create an account' : 'Login to your account'}
+          </CardTitle>
+          <CardDescription className="text-center">
+            {type === 'signup'
+              ? 'Already have an account?'
+              : "Don't have an account?"}
+            <Link
+              className='pl-2 underline text-primary'
+              to={type === 'signin' ? '/signup' : '/signin'}
+            >
+              {type === 'signin' ? 'Sign Up' : 'Sign In'}
+            </Link>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Rate limit warning */}
+          {isLocked && (
+            <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>
+                Too many attempts. Please wait {getRemainingLockTime()} seconds.
+              </span>
+            </div>
+          )}
+
+          {/* Remaining attempts warning */}
+          {!isLocked && remainingAttempts <= 2 && remainingAttempts > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-sm text-yellow-600 dark:text-yellow-400">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>
+                {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
+              </span>
+            </div>
+          )}
+
+          {type === 'signup' && (
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                value={postInputs.name}
                 onChange={e => {
                   setPostInputs(c => ({
                     ...c,
                     name: e.target.value
                   }))
                 }}
+                onKeyDown={handleKeyDown}
+                disabled={isLocked}
+                required
               />
-            ) : null}
-            <LabelledInput
-              label='Email'
-              placeholder='Enter your email'
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={postInputs.email}
               onChange={e => {
                 setPostInputs(c => ({
                   ...c,
                   email: e.target.value
                 }))
               }}
+              onKeyDown={handleKeyDown}
+              disabled={isLocked}
+              required
             />
-            <LabelledInput
-              label='Password'
-              type={'password'}
-              placeholder='Enter your password'
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={postInputs.password}
               onChange={e => {
                 setPostInputs(c => ({
                   ...c,
                   password: e.target.value
                 }))
               }}
+              onKeyDown={handleKeyDown}
+              disabled={isLocked}
+              required
+              minLength={8}
             />
-
-            <Button label={type === 'signup' ? 'Sign up' : 'Sign in'} submit={sendRequest}/>
-            <Login label={type === 'signup'? 'Sign up': 'Sign in'}/>
           </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-type LabelledInput = {
-  label: string
-  placeholder: string
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void
-  type?: string
-}
-
-const LabelledInput: React.FC<LabelledInput> = ({
-  label,
-  placeholder,
-  onChange,
-  type
-}) => {
-  return (
-    <div>
-      <div>
-        <label className='block mt-2 pt-4 text-semibold font-medium text-black'>
-          {label}
-        </label>
-        <input
-          type={type || 'text'}
-          onChange={onChange}
-          id='first_name'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
-          placeholder={placeholder}
-          required
-        />
-      </div>
+          <Button 
+            className="w-full" 
+            onClick={sendRequest}
+            disabled={loading || isLocked}
+          >
+            {loading ? 'Please wait...' : (type === 'signup' ? 'Sign up' : 'Sign in')}
+          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Login label={type === 'signup' ? 'Sign up' : 'Sign in'} />
+        </CardContent>
+      </Card>
     </div>
   )
 }
 
 export { Auth }
+
