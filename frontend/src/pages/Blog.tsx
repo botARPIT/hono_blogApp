@@ -1,33 +1,41 @@
-import { useParams } from "react-router-dom";
-import { FullBlog } from "../components/FullBlog";
-import Loading from "../components/Loading";
-import { useBlog,} from "../hooks"
-import Appbar from "../components/Appbar";
-import { toast } from "sonner";
-
+import { useParams } from "react-router-dom"
+import { FullBlog } from "../components/FullBlog"
+import { BlogDetailSkeleton } from "../components/Loading"
+import { useBlog } from "../hooks/queries"
+import Appbar from "../components/Appbar"
+import { toast } from "sonner"
 
 export default function Blog() {
-  const {id} = useParams()
-  const {loading, blog} = useBlog({id: id || "1"});
-  if(loading){
-     return <div className="">
-            <Loading />
+  const { id } = useParams()
+  const { data: blog, isLoading, isError } = useBlog(id || "")
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Appbar />
+        <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
+          <BlogDetailSkeleton />
         </div>
-  } 
-  if(!blog){
-    toast.error("Unable to find the blog")
-    return <div>
-      Unable to get blog
-    </div>
+      </div>
+    )
   }
+
+  if (isError || !blog) {
+    toast.error("Unable to find the blog")
+    return (
+      <div className="min-h-screen bg-background">
+        <Appbar />
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <p className="text-muted-foreground">Unable to load this blog</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <Appbar />
-    
-    <div className="pt-10">
-     
-      <FullBlog blog={blog}/>
-    </div>
+      <FullBlog blog={blog} />
     </div>
   )
 }

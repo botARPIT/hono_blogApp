@@ -1,16 +1,17 @@
-
-import { AppError, BadRequestError, ErrorCode } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
+import { UserDetailsDTO } from "../types/user.types";
+import { prismaErrorObject, prismaErrorWrapper } from "../errors/prismaErrorWrapper";
+import { Bindings } from "../types/env.types";
+import { GetBlogDTO } from "../types/blog.types";
+import { AppConfig } from "../config";
 
-export async function createUser(name: string, email: string, password: string, dbUrl: string) {
+export async function getUserProfile(id: string, dbUrl: AppConfig['DATABASE_URL']): Promise<UserDetailsDTO | null> {
     const prisma = getPrismaClient(dbUrl)
     try {
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password
-            }, 
+        const user = await prisma.user.findUnique({
+            where: {
+                id
+            },
             select: {
                 id: true,
                 name: true,
@@ -18,31 +19,31 @@ export async function createUser(name: string, email: string, password: string, 
                 createdAt: true
             }
         })
-        if(!user) throw new BadRequestError("User already exists")
-         return user 
+        if (!user) return null
+        return user
     } catch (error) {
-         console.log(error)
-         throw new AppError("Cannot create user", 500, ErrorCode.PRISMA_ERROR, error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
-export async function findUniqueUser(email: string, dbUrl: string) {
+export async function updateProfile(id: string, data: { name?: string, email?: string }, dbUrl: AppConfig['DATABASE_URL']): Promise<UserDetailsDTO> {
+    const prisma = getPrismaClient(dbUrl)
     try {
-        const prisma = getPrismaClient(dbUrl);
-        const user = await prisma.user.findUnique({
-            where: {
-                email
-            }, 
+        const updatedUser = await prisma.user.update({
+            where: { id },
+            data: {
+                name: data.name,
+                email: data.email
+            },
             select: {
                 id: true,
                 name: true,
-                password: true
+                email: true,
+                createdAt: true
             }
         })
-        if(!user) throw new BadRequestError("User does not exist")
-        else return user 
+        return updatedUser
     } catch (error) {
-        console.log(error)
-        throw new AppError("Cannot find user", 500, ErrorCode.PRISMA_ERROR, error)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }

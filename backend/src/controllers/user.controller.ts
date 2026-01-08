@@ -1,35 +1,34 @@
 import { Context } from "hono";
 import { createUserService } from "../services/user.service";
+import { updateProfileSchema } from "../types/user.types";
+import { BadRequestError, ServiceName, ZodValidationError } from "../errors/app-error";
 
-import { userInputPolicy } from "../policies/user.policy";
-import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
-import { ZodError } from "../errors/app-error";
-import { setCookies } from "../utils/setCookies";
-
- class UserController{
-    constructor(private userService : ReturnType<typeof createUserService> ){}
-
-    async signup(c: Context){
-        const body = await c.req.json<UserSignUpDTO>();
-        const inputValidation = userInputPolicy.validateSignUp(body)
-        if(!inputValidation.success) throw new ZodError("Zod validation failed")
-        const result = await this.userService.signup(inputValidation.data)
-        setCookies(c, result)
-        return c.json(result)
-        
+class UserController {
+    constructor(private userService: ReturnType<typeof createUserService>) { }
+    async getProfileInfo(c: Context) {
+        const { id: userId } = c.get('jwtPayload')
+        if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER)
+        const userProfile = await this.userService.getProfileInfo(userId)
+        return c.json({ userProfile: userProfile })
     }
 
-    async signin(c: Context){
-        const body = await c.req.json<UserSignInDTO>()
-        const inputValidation = userInputPolicy.validateSignIn(body)
-        if(!inputValidation.success) throw new ZodError("Zod validation failed")
-            const result = await this.userService.signin(inputValidation.data)
-        setCookies(c, result)
+    async updateProfile(c: Context) {
+        const { id: userId } = c.get('jwtPayload')
+        if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER)
+
+        const body = await c.req.json()
+        const parsed = updateProfileSchema.safeParse(body)
+        if (!parsed.success) {
+            throw new ZodValidationError("Invalid input", { message: parsed.error })
+        }
+
+        const result = await this.userService.updateProfile(userId, parsed.data)
         return c.json(result)
     }
-}   
 
-export default function createController(obj: ReturnType<typeof createUserService>){
+}
+
+export default function createController(obj: ReturnType<typeof createUserService>) {
     return new UserController(obj)
 }
 

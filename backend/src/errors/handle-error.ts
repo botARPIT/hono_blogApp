@@ -6,9 +6,9 @@ export function handleError(c: Context, error: unknown){
         return c.json({
             success: false,
             error: {
-                code: error.code,
+                code: error.errorCode,
                 message: error.message,
-                details: error.details || null
+                details: error.meta || null
             }
         }, error.statusCode)
     }

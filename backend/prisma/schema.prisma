@@ -18,11 +18,13 @@ model User {
   id String @id @default(uuid()) @db.Uuid
   name String 
   email String @unique
-  password String 
+  password String?
+  authProvider AuthProvider @default(LOCAL)
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
   isAdmin Boolean @default(false)
   blogs Blog[]
+  blogLikes BlogLike[]
 
   @@index([email])
 }
@@ -33,13 +35,51 @@ model Blog{
   authorId String @db.Uuid
   author User @relation(fields: [authorId], references: [id])
   title String 
+  tag BlogTag @default(GENERAL)
   content String 
   thumbnail String
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
   like Int @default(0) @db.Integer
   published Boolean @default(false)
+  likes BlogLike[]
 
-  @@index([authorId])
+  @@index([id])
 	@@map("Blog")
+}
+
+model BlogLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  blogId    String   @db.Uuid
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([blogId, userId])
+  @@index([blogId])
+  @@index([userId])
+  @@map("BlogLike")
+}
+
+enum AuthProvider { 
+  LOCAL
+  GOOGLE
+}
+
+ enum BlogTag {
+  SOCIAL
+  TECH
+  ENTERTAINMENT
+  INFOTAINMENT
+  SPORTS
+  MOVIES
+  GAMING
+  PHILOSOPHY
+  SCIENCE
+  ART
+  NATURE
+  WILDLIFE
+  GENERAL
 }
