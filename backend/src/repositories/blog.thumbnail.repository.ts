@@ -5,7 +5,7 @@ import { DBError, NotFoundError } from '../errors/app-error';
 
 const BUCKET_NAME = "blog-thumbnail"
 export type FolderLocation = "thumbnails" | "profile"
-export const getSupabaseClient =  () => {
+export const getSupabaseClient = () => {
     return createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string)
 
 
@@ -24,7 +24,6 @@ export const uploadFile = async (file: string, folderLocation: FolderLocation, u
     if (!supabase) return new DBError("Unable to get supabase client", { message: "Unable to connect to storage, try after sometime" })
     const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(fileName, decode(file), { contentType: 'image/jpeg', upsert: upsertValue })
     if (error) {
-        // console.log(error)
         throw new DBError("Failed to upload file", { message: "Unable to upload file, try again after sometime" })
     }
 

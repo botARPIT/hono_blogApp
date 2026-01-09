@@ -1,7 +1,6 @@
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { hashPassword } from '../../utils/hashUsingWebCrypto'
-import { hash } from 'bcryptjs'
 vi.mock('../../utils/hexToBytes')
 
 describe('Password hashing security tests', () => {

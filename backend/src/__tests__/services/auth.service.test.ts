@@ -16,14 +16,17 @@ vi.mock('../../utils/hashUsingWebCrypto')
 vi.mock('../../utils/setCookies')
 
 describe('Testing the auth service', () => {
-    const mockedEnv: EnvironmentVariables = {
+    const mockedEnv = {
         DATABASE_URL: "abc",
         JWT_ACCESS_SECRET: "abc",
         JWT_REFRESH_SECRET: "abc",
         GOOGLE_CLIENT_ID: "abc",
         GOOGLE_CLIENT_SECRET: "abc",
         REDIRECT_URI: "abc",
-        RATE_LIMIT_KV: "abc"
+        FRONTEND_REDIRECT_URL: "abc",
+        FRONTEND_ORIGIN: "http://localhost:5173",
+        ENVIRONMENT: "development" as const,
+        RATE_LIMIT_KV: {} as KVNamespace<string>
     }
 
     beforeEach(() => {
@@ -168,7 +171,8 @@ describe('Testing the auth service', () => {
         }
         const mockedTokens = {
             accessToken: "This is mocked access token",
-            refreshToken: "This is mocked refresh token"
+            refreshToken: "This is mocked refresh token",
+            name: "Test name"  // signin now returns name as well
         }
 
         const mockedPayload = {

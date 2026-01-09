@@ -1,7 +1,6 @@
 
 import { Hono } from "hono";
 import { createUserService } from "../services/user.service";
-import 'dotenv/config'
 import { Bindings } from '../types/env.types';
 import createController from "../controllers/user.controller";
 import { handleError } from "../errors/handle-error";

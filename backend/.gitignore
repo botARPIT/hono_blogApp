@@ -19,7 +19,9 @@ wrangler.jsonc
 .env
 .env.production
 .dev.vars
-
+# files
+backend/src/repositories/blog.thumbnail.repository.ts
+backend/src/utils/hash.ts
 # logs
 logs/
 *.log

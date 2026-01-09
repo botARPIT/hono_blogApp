@@ -29,6 +29,7 @@
     "hono-rate-limiter": "^0.4.2",
     "isomorphic-dompurify": "^2.35.0",
     "jsonwebtoken": "^9.0.2",
+    "miniflare": "^4.20260107.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
