@@ -40,11 +40,20 @@ export type DeletedBlogDTO = BlogDTO
 export const blogSchema = z.object({
     id: z.string().trim().optional(),
     title: z.string().min(10, { message: "Title too short" }).max(100, { message: "Title cannot exceed 100 characters" }).trim(),
-    content: z.string().min(150, { message: "Add more content" }).max(5000, { message: "Content cannot exceed 2000 characters" }).trim(),
+    content: z.string().max(5000, { message: "Content cannot exceed 5000 characters" }).trim(),
     thumbnail: z.string().trim(),
     authorId: z.string().trim().optional(),
     tag: z.nativeEnum(BlogTag, { message: "Select valid blog category" }),
     published: z.boolean().optional().default(false)
+}).superRefine((data, ctx) => {
+    // Only enforce content minimum length when publishing
+    if (data.published && data.content.length < 150) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Add more content (at least 150 characters required to publish)",
+            path: ["content"]
+        });
+    }
 })
 
 export const updateBlogSchema = z.object({

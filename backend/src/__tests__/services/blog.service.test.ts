@@ -325,10 +325,11 @@ describe('Blog service tests', () => {
             expect(blogRepo.getUserBlogs).toHaveBeenCalledWith('user123', mockedEnv.DATABASE_URL)
         })
 
-        it('should throw NotFoundError if user has no blogs', async () => {
+        it('should return empty array if user has no blogs', async () => {
             vi.mocked(blogRepo.getUserBlogs).mockResolvedValue([])
             const service = createBlogService(mockedEnv)
-            await expect(service.getUserBlogs('user445')).rejects.toThrow("No blogs found for this user")
+            const result = await service.getUserBlogs('user445')
+            expect(result).toEqual([])
             expect(blogRepo.getUserBlogs).toHaveBeenCalledWith('user445', mockedEnv.DATABASE_URL)
         })
 
