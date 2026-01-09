@@ -30,8 +30,7 @@ class BlogService {
 
     async getUserBlogs(userId: string): Promise<GetBlogDTO[]> {
         const blogs = await getUserBlogs(userId, this.env.DATABASE_URL)
-        if (!blogs || blogs.length === 0) throw new NotFoundError("No blogs found for this user")
-        return blogs
+        return blogs || []
     }
 
 
