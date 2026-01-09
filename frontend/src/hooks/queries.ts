@@ -308,33 +308,59 @@ export function useTogglePublish() {
     return useMutation({
         mutationFn: togglePublishBlogApi,
         onMutate: async ({ id, published }) => {
-            // Cancel outgoing refetches
+            // Cancel outgoing refetches for both user blogs and public blogs
             await queryClient.cancelQueries({ queryKey: queryKeys.userBlogs })
+            await queryClient.cancelQueries({ queryKey: queryKeys.blogs })
 
-            // Snapshot previous value
-            const previousBlogs = queryClient.getQueryData<BlogDTO[]>(queryKeys.userBlogs)
+            // Snapshot previous values
+            const previousUserBlogs = queryClient.getQueryData<BlogDTO[]>(queryKeys.userBlogs)
 
-            // Optimistically update
-            if (previousBlogs) {
+            // Get all cached blog pages
+            const blogQueries = queryClient.getQueriesData<BlogDTO[]>({ queryKey: queryKeys.blogs })
+
+            // Optimistically update user blogs
+            if (previousUserBlogs) {
                 queryClient.setQueryData<BlogDTO[]>(
                     queryKeys.userBlogs,
-                    previousBlogs.map(blog =>
+                    previousUserBlogs.map(blog =>
                         blog.id === id ? { ...blog, published } : blog
                     )
                 )
             }
 
-            return { previousBlogs }
+            // Optimistically update public blogs list
+            blogQueries.forEach(([queryKey, oldData]) => {
+                if (oldData) {
+                    if (published) {
+                        // Blog is being published - it will appear after refetch
+                        // Don't add it optimistically as we don't have full data
+                    } else {
+                        // Blog is being unpublished - remove it immediately
+                        queryClient.setQueryData<BlogDTO[]>(
+                            queryKey,
+                            oldData.filter(blog => blog.id !== id)
+                        )
+                    }
+                }
+            })
+
+            return { previousUserBlogs, blogQueries }
         },
         onSuccess: (_data, { published }) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.userBlogs })
-            queryClient.invalidateQueries({ queryKey: queryKeys.blogs })
+            // Refetch to get fresh data from server
+            queryClient.refetchQueries({ queryKey: queryKeys.userBlogs })
+            queryClient.refetchQueries({ queryKey: queryKeys.blogs })
             toast.success(published ? 'Blog published!' : 'Blog unpublished')
         },
         onError: (error, _variables, context) => {
             // Rollback on error
-            if (context?.previousBlogs) {
-                queryClient.setQueryData(queryKeys.userBlogs, context.previousBlogs)
+            if (context?.previousUserBlogs) {
+                queryClient.setQueryData(queryKeys.userBlogs, context.previousUserBlogs)
+            }
+            if (context?.blogQueries) {
+                context.blogQueries.forEach(([queryKey, oldData]) => {
+                    queryClient.setQueryData(queryKey, oldData)
+                })
             }
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.error?.message
