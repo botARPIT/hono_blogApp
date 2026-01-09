@@ -7,6 +7,7 @@ import { ThemeProvider } from './components/theme-provider'
 import { AuthProvider } from './context/AuthContext'
 import Loading from './components/Loading'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { PublicRoute } from './components/PublicRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 
 // Lazy load pages for code splitting
@@ -44,8 +45,16 @@ function App() {
                 <Routes>
                   {/* Public routes */}
                   <Route path='/' element={<Navigate to="/signin" />} />
-                  <Route path='/signup' element={<Signup />} />
-                  <Route path='/signin' element={<Signin />} />
+                  <Route path='/signup' element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  } />
+                  <Route path='/signin' element={
+                    <PublicRoute>
+                      <Signin />
+                    </PublicRoute>
+                  } />
                   <Route path='/blog/:id' element={<Blog />} />
                   <Route path='/blogs' element={<Blogs />} />
                   

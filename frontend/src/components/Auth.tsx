@@ -1,14 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import axios from 'axios'
 import { BACKEND_URL } from '../config'
-import { toast } from 'sonner'
 import { Login } from './Login'
-import { useAuth } from '../context/AuthContext'
 import { useRateLimit } from '../hooks/useRateLimit'
 import { AlertTriangle } from 'lucide-react'
 
@@ -19,20 +16,16 @@ type UserAuthDTO = {
 }
 
 const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
-  const navigate = useNavigate()
-  const { setUserName } = useAuth()
   const [postInputs, setPostInputs] = useState<UserAuthDTO>({
     name: '',
     email: '',
     password: ''
   })
-  const [loading, setLoading] = useState(false)
+  const [loading] = useState(false)
 
   // Rate limiting for auth attempts
   const { 
     isLocked, 
-    recordAttempt, 
-    resetAttempts, 
     remainingAttempts,
     getRemainingLockTime
   } = useRateLimit(`auth_${type}`, {
@@ -41,70 +34,7 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
     lockoutMs: 300000,    // 5 minute lockout
   })
 
-  async function sendRequest() {
-    // Check rate limit first
-    if (isLocked) {
-      const remainingTime = getRemainingLockTime()
-      toast.error(`Too many attempts. Please try again in ${remainingTime} seconds.`)
-      return
-    }
 
-    if (!postInputs.email || !postInputs.password) {
-      toast.error('Email and password are required')
-      return
-    }
-
-    if (type === 'signup' && !postInputs.name) {
-      toast.error('Name is required')
-      return
-    }
-
-    // Record the attempt
-    if (!recordAttempt()) {
-      return // Rate limited
-    }
-
-    setLoading(true)
-    try {
-      const response = await axios.post(`${BACKEND_URL}/api/v1/auth/${type === "signup" ? "signup" : "signin"}`, postInputs, {
-        withCredentials: true
-      })
-      
-      // Reset rate limit on successful auth
-      resetAttempts()
-      
-      // Save user info and update context
-      let name = ''
-      if (type === 'signup' && postInputs.name) {
-        name = postInputs.name
-      } else if (response.data.name) {
-        name = response.data.name
-      } else if (response.data.user?.name) {
-        name = response.data.user.name
-      }
-      
-      if (name) {
-        setUserName(name)
-      }
-
-      toast.success(`${type === 'signup' ? "User created" : "Signed in"} successfully`)
-      navigate('/blogs')
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error?.message
-        : `Unable to ${type === 'signin' ? "sign in" : "sign up"}. Check your email/password`
-      toast.error(message || `Unable to ${type === 'signin' ? "sign in" : "sign up"}. Check your email/password`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Handle Enter key press
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !loading && !isLocked) {
-      sendRequest()
-    }
-  }
 
   return (
     <div className='h-screen flex justify-center items-center bg-background px-4'>
@@ -149,11 +79,13 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
             </div>
           )}
 
+          <form action={`${BACKEND_URL}/api/v1/auth/${type === 'signup' ? 'signup' : 'signin'}`} method="POST">
           {type === 'signup' && (
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
+                name="name"
                 type="text"
                 placeholder="Enter your name"
                 value={postInputs.name}
@@ -163,16 +95,16 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
                     name: e.target.value
                   }))
                 }}
-                onKeyDown={handleKeyDown}
                 disabled={isLocked}
                 required
               />
             </div>
           )}
-          <div className="space-y-2">
+          <div className="space-y-2 mb-4">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="Enter your email"
               value={postInputs.email}
@@ -182,15 +114,15 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
                   email: e.target.value
                 }))
               }}
-              onKeyDown={handleKeyDown}
               disabled={isLocked}
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 mb-4">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Enter your password"
               value={postInputs.password}
@@ -200,19 +132,21 @@ const Auth = ({ type }: { type: 'signup' | 'signin' }) => {
                   password: e.target.value
                 }))
               }}
-              onKeyDown={handleKeyDown}
               disabled={isLocked}
               required
               minLength={8}
             />
           </div>
+          {type === 'signin' && <input type="hidden" name="authProvider" value="LOCAL" />}
+          
           <Button 
             className="w-full" 
-            onClick={sendRequest}
+            type="submit"
             disabled={loading || isLocked}
           >
             {loading ? 'Please wait...' : (type === 'signup' ? 'Sign up' : 'Sign in')}
           </Button>
+          </form>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
