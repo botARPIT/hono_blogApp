@@ -12,7 +12,7 @@ export const getSupabaseClient = () => {
 }
 export const getStorageInfo = async () => {
     const supabase = getSupabaseClient()
-    const { data, error } = await supabase.storage.getBucket("blog-thumbnail")
+    const { data, error: _error } = await supabase.storage.getBucket("blog-thumbnail")
     return !data ? new DBError("Unable to get supabase storage info", { message: "Cannot access storage, try after sometime" }) : data
 }
 

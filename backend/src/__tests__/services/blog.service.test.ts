@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createBlogService } from '../../services/blog.service'
 import * as blogRepo from '../../repositories/blog.repository'
-import { NotFoundError } from '../../errors/app-error'
-import { BlogTag, type CreatedBlogDTO, type DeletedBlogDTO, type GetBlogDTO } from '../../types/blog.types'
+import { BlogTag, type CreatedBlogDTO, type GetBlogDTO } from '../../types/blog.types'
 
 vi.mock('../../repositories/blog.repository')
 
@@ -62,7 +61,7 @@ describe('Blog service tests', () => {
             vi.mocked(blogRepo.createBlog).mockRejectedValue(new Error("DB Error"))
             const service = createBlogService(mockedEnv)
 
-            const result = await expect(service.addBlog(
+            await expect(service.addBlog(
                 { title: 'a', content: 'a', tag: BlogTag.ART, thumbnail: 'a.jpg', published: true },
                 'a123')).rejects.toThrow("DB Error")
         })
@@ -100,7 +99,7 @@ describe('Blog service tests', () => {
         it('should throw an error', async () => {
             vi.mocked(blogRepo.updateBlog).mockRejectedValue(new Error('DB Error'))
             const service = createBlogService(mockedEnv)
-            const result = await expect(service.update({ title: 'x' }, '456', 'author123'))
+            await expect(service.update({ title: 'x' }, '456', 'author123'))
                 .rejects.toThrow("DB Error")
         })
     })
@@ -132,7 +131,7 @@ describe('Blog service tests', () => {
         it('should throw an error', async () => {
             vi.mocked(blogRepo.deleteBlog).mockRejectedValue(new Error('DB Error'))
             const service = createBlogService(mockedEnv)
-            const result = await expect(service.delete('abc', '123'))
+            await expect(service.delete('abc', '123'))
                 .rejects.toThrow("DB Error")
         })
     })
@@ -161,7 +160,7 @@ describe('Blog service tests', () => {
             vi.mocked(blogRepo.getBlogById).mockResolvedValue(null)
 
             const service = createBlogService(mockedEnv)
-            const result = await expect(service.getBlog('123')).rejects.toThrow("Blog not found")
+            await expect(service.getBlog('123')).rejects.toThrow("Blog not found")
 
             expect(blogRepo.getBlogById).toHaveBeenCalledWith('123', mockedEnv.DATABASE_URL)
         })

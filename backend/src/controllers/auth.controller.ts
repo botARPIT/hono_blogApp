@@ -7,7 +7,6 @@ import { getCookie } from "hono/cookie";
 import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
 import { userInputPolicy } from "../policies/user.policy";
 import { ZodValidationError } from "../errors/app-error";
-import { sanitizeText } from "../utils/sanitize";
 
 
 

@@ -3,12 +3,8 @@ import * as authRepo from '../../repositories/auth.repository'
 import { createAuthService } from '../../services/auth.service'
 import * as jwtUtil from '../../utils/jwt'
 import * as hashUtil from '../../utils/hashUsingWebCrypto'
-import { setCookies } from '../../utils/setCookies'
-import { Environment } from 'vite'
-import { EnvironmentVariables } from '../../types/env.types'
 import { AuthProvider } from '@prisma/client/edge'
-import { ExistingUserDTO } from '../../types/user.types'
-import { AppError, BadRequestError } from '../../errors/app-error'
+import { AppError } from '../../errors/app-error'
 
 vi.mock('../../repositories/auth.repository')
 vi.mock('../../utils/jwt')

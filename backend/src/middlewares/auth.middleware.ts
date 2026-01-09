@@ -20,7 +20,7 @@ export const authMiddleware = createMiddleware<{ Bindings: Bindings, Variables: 
       const payload = await jwtVerify(token, c.env.JWT_ACCESS_SECRET)
       c.set("jwtPayload", payload)
       await next()
-   } catch (error) {
+   } catch (_error) {
       throw new UnauthorizedError("Unauthorized access")
    }
 })
