@@ -74,7 +74,7 @@ class BlogController {
         if (!blogId) throw new BadRequestError("Blog id missing", ServiceName.CONTROLLER, { message: "Kindly provide blog id" })
         if (!userId) throw new BadRequestError("User id missing", ServiceName.CONTROLLER, { message: "Authentication required" })
         const hasLiked = await this.blogService.hasUserLikedBlog(blogId, userId)
-        return c.json({ hasLiked })
+        return c.json(hasLiked)
     }
 }
 // factory function
