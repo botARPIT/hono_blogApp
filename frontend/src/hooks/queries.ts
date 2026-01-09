@@ -83,7 +83,7 @@ const checkLikeStatusApi = async (id: string): Promise<{ hasLiked: boolean }> =>
 }
 
 const togglePublishBlogApi = async ({ id, published }: { id: string; published: boolean }): Promise<{ published: boolean }> => {
-    const { data } = await axios.patch(`${BACKEND_URL}/api/v1/blog/update/${id}`, { published }, {
+    const { data } = await axios.patch(`${BACKEND_URL}/api/v1/blog/updateBlog/${id}`, { published }, {
         withCredentials: true
     })
     return data
