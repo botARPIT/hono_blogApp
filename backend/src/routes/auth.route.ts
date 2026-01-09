@@ -104,11 +104,17 @@ authRouter.post('/signin', async (c) => {
 
 authRouter.post("/logout", async (c) => {
    try {
-      deleteCookie(c, 'access_token', {
-         secure: true,
-         sameSite: 'None',
-         httpOnly: true
-      })
+      const isProduction = c.env.ENVIRONMENT === 'production';
+      const cookieOptions = {
+         path: '/',
+         httpOnly: true,
+         secure: isProduction,
+         sameSite: isProduction ? 'None' as const : 'Lax' as const,
+      };
+
+      deleteCookie(c, 'access_token', cookieOptions)
+      deleteCookie(c, 'refresh_token', cookieOptions)
+
       return c.json({ message: "User logged out" })
    } catch (error) {
       return handleError(c, error)

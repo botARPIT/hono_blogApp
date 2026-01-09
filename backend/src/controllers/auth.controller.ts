@@ -7,6 +7,7 @@ import { getCookie } from "hono/cookie";
 import { UserSignInDTO, UserSignUpDTO } from "../types/user.types";
 import { userInputPolicy } from "../policies/user.policy";
 import { ZodValidationError } from "../errors/app-error";
+import { getConfig } from "../config";
 
 
 
@@ -35,25 +36,37 @@ class AuthController {
         return this.authService.getRefreshToken(c, refreshToken)
     }
 
+    private async parseBody<T>(c: Context): Promise<T> {
+        const contentType = c.req.header('Content-Type');
+        if (contentType?.includes('application/json')) {
+            return c.req.json<T>();
+        }
+        const body = await c.req.parseBody();
+        return body as unknown as T;
+    }
+
     async signup(c: Context) {
-        const body = await c.req.json<UserSignUpDTO>();
+        const body = await this.parseBody<UserSignUpDTO>(c);
         const inputValidation = userInputPolicy.validateSignUp(body)
         if (!inputValidation.success) throw new ZodValidationError("Zod validation failed", { message: inputValidation.error })
         const result = await this.authService.signup(inputValidation.data)
+        const config = getConfig(c.env)
         setCookies(c, result)
-        return c.json(result)
-
+        return c.redirect(config.FRONTEND_REDIRECT_URL)
     }
 
     async signin(c: Context) {
-        const body = await c.req.json<UserSignInDTO>()
+        const rawBody = await this.parseBody<UserSignInDTO>(c);
+        const body = { ...rawBody, authProvider: rawBody.authProvider || 'LOCAL' };
+
         const inputValidation = userInputPolicy.validateSignIn(body)
         if (!inputValidation.success) {
             throw new ZodValidationError("Validation error", { field: "Incorrect email/password", message: "Password should be of minimum 8 of characters" },)
         }
         const result = await this.authService.signin(inputValidation.data)
+        const config = getConfig(c.env)
         setCookies(c, result)
-        return c.json(result)
+        return c.redirect(config.FRONTEND_REDIRECT_URL)
     }
 }
 

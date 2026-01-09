@@ -97,6 +97,7 @@ class AuthService {
             throw new ValidationError("Password does not match", ServiceName.BUSINESS, { message: "Enter correct password" })
         }
         const { id, name } = user
+
         const { accessToken, refreshToken } = generateTokens({ id, name }, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
         return { accessToken, refreshToken, name }
     }

@@ -9,9 +9,9 @@
   "vars": {  
     "GOOGLE_CLIENT_ID": "416523459097-41vnr3kbainefavt6ubqqkb61bfjs0es.apps.googleusercontent.com",
     "ENVIRONMENT": "production",
-    "REDIRECT_URI": "https://backend.fevoro2226.workers.dev/api/v1/auth/google/callback",
-    "FRONTEND_REDIRECT_URL": "https://blogify.arpitdev.site"
-
+    "REDIRECT_URI": "https://blogify-backend.fevoro2226.workers.dev/api/v1/auth/google/callback",
+    "FRONTEND_REDIRECT_URL": "https://blogify.arpitdev.site",
+    "FRONTEND_ORIGIN": "https://blogify.arpitdev.site"
   },
 
   "placement": {

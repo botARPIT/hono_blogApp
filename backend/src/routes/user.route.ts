@@ -6,6 +6,7 @@ import createController from "../controllers/user.controller";
 import { handleError } from "../errors/handle-error";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { getConfig } from "../config";
+import { deleteCookie } from "hono/cookie";
 
 
 
@@ -40,8 +41,17 @@ userRouter.patch('/update_profile', async (c) => {
 
 userRouter.post("/logout", async (c) => {
    try {
-      // Clear the auth token cookie
-      c.header('Set-Cookie', 'token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0')
+      const isProduction = c.env.ENVIRONMENT === 'production';
+      const cookieOptions = {
+         path: '/',
+         httpOnly: true,
+         secure: isProduction,
+         sameSite: isProduction ? 'None' as const : 'Lax' as const,
+      };
+
+      deleteCookie(c, "access_token", cookieOptions);
+      deleteCookie(c, "refresh_token", cookieOptions);
+
       return c.json({ message: "Logged out successfully" }, 200)
    } catch (error) {
       return handleError(c, error)
