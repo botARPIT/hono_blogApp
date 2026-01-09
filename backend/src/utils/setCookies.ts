@@ -12,14 +12,14 @@ function setCookies(c: Context<{ Bindings: Bindings }>, token: Token) {
     setCookie(c, "access_token", accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'Lax',
+        sameSite: 'None',
         path: '/',
         maxAge: 60 * 60
     })
     setCookie(c, "refresh_token", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'Lax',
+        sameSite: 'None',
         path: '/',
         maxAge: 60 * 60 * 24 * 2
     })
