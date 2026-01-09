@@ -26,10 +26,13 @@ jobs:
 
       - name: Run lint
         run: npm run lint
+        working-directory: backend
 
       - name: Run tests
         run: npm run test
+        working-directory: backend
 
-      - name: Run build
-        run: npm run build
+      - name: Run typecheck
+        run: npm run typecheck
+        working-directory: backend
 
