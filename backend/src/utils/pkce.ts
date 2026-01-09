@@ -42,14 +42,14 @@ export function setPKCECookies(c: Context<{ Bindings: Bindings }>, codeVerifier:
     setCookie(c, 'code_verifier', codeVerifier, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'Lax', // Lax is needed for OAuth redirect
+        sameSite: isProduction ? 'None' : 'Lax',
         maxAge: 600, // 10 minutes
         path: '/'
     });
     setCookie(c, 'oauth_state', state, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'Lax',
+        sameSite: isProduction ? 'None' : 'Lax',
         maxAge: 600, // 10 minutes
         path: '/'
     });

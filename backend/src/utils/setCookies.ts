@@ -11,14 +11,14 @@ function setCookies(c: Context<{ Bindings: Bindings }>, token: Token) {
 
     setCookie(c, "access_token", accessToken, {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: 'Lax', // 'Lax' allows cookies after OAuth redirect
+        secure: true,
+        sameSite: 'Lax',
         path: '/',
         maxAge: 60 * 60
     })
     setCookie(c, "refresh_token", refreshToken, {
         httpOnly: true,
-        secure: isProduction,
+        secure: true,
         sameSite: 'Lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 2
