@@ -37,7 +37,8 @@ const fetchUserBlogs = async (): Promise<BlogDTO[]> => {
         const { data } = await axios.get(`${BACKEND_URL}/api/v1/blog/my-blogs`, {
             withCredentials: true
         })
-        return Array.isArray(data.blogs) ? data.blogs : []
+        // Backend returns array directly, not wrapped in { blogs: [...] }
+        return Array.isArray(data) ? data : []
     } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             return []
@@ -75,6 +76,14 @@ const likeBlogApi = async (id: string): Promise<{ like: number; hasLiked: boolea
 
 const checkLikeStatusApi = async (id: string): Promise<{ hasLiked: boolean }> => {
     const { data } = await axios.get(`${BACKEND_URL}/api/v1/blog/like-status/${id}`, {
+        withCredentials: true
+    })
+    // Backend returns boolean directly, wrap it for consistent usage
+    return { hasLiked: typeof data === 'boolean' ? data : !!data }
+}
+
+const togglePublishBlogApi = async ({ id, published }: { id: string; published: boolean }): Promise<{ published: boolean }> => {
+    const { data } = await axios.patch(`${BACKEND_URL}/api/v1/blog/update/${id}`, { published }, {
         withCredentials: true
     })
     return data
@@ -290,5 +299,47 @@ export function useLikeStatus(blogId: string) {
         queryFn: () => checkLikeStatusApi(blogId),
         enabled: !!blogId,
         staleTime: 1000 * 60 * 5, // 5 minutes
+    })
+}
+
+export function useTogglePublish() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: togglePublishBlogApi,
+        onMutate: async ({ id, published }) => {
+            // Cancel outgoing refetches
+            await queryClient.cancelQueries({ queryKey: queryKeys.userBlogs })
+
+            // Snapshot previous value
+            const previousBlogs = queryClient.getQueryData<BlogDTO[]>(queryKeys.userBlogs)
+
+            // Optimistically update
+            if (previousBlogs) {
+                queryClient.setQueryData<BlogDTO[]>(
+                    queryKeys.userBlogs,
+                    previousBlogs.map(blog =>
+                        blog.id === id ? { ...blog, published } : blog
+                    )
+                )
+            }
+
+            return { previousBlogs }
+        },
+        onSuccess: (_data, { published }) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.userBlogs })
+            queryClient.invalidateQueries({ queryKey: queryKeys.blogs })
+            toast.success(published ? 'Blog published!' : 'Blog unpublished')
+        },
+        onError: (error, _variables, context) => {
+            // Rollback on error
+            if (context?.previousBlogs) {
+                queryClient.setQueryData(queryKeys.userBlogs, context.previousBlogs)
+            }
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.error?.message
+                : 'Failed to update blog'
+            toast.error(message || 'Failed to update blog')
+        },
     })
 }

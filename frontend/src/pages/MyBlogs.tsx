@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import Appbar from '../components/Appbar'
 import BlogCard from '../components/BlogCard'
-import { useUserBlogs, useDeleteBlog } from '../hooks/queries'
+import { useUserBlogs, useDeleteBlog, useTogglePublish } from '../hooks/queries'
 import { DeleteBlogDialog } from '../components/DeleteBlogDialog'
-import { Edit2, Plus, BookOpen, Trash2, FileText, Eye } from 'lucide-react'
+import { Edit2, Plus, BookOpen, Trash2, FileText, Eye, EyeOff, Send } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -11,9 +11,14 @@ import { Badge } from '../components/ui/badge'
 export default function MyBlogs() {
   const { data: blogs = [], isLoading, isError, refetch } = useUserBlogs()
   const deleteBlog = useDeleteBlog()
+  const togglePublish = useTogglePublish()
 
   const handleDelete = (id: string) => {
     deleteBlog.mutate(id)
+  }
+
+  const handleTogglePublish = (id: string, currentStatus: boolean) => {
+    togglePublish.mutate({ id, published: !currentStatus })
   }
 
   // Separate drafts and published blogs
@@ -92,6 +97,19 @@ export default function MyBlogs() {
           </div>
         </Link>
         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+          {/* Publish/Unpublish button */}
+          <Button 
+            size="sm" 
+            variant={blog.published ? "outline" : "default"}
+            className="h-9 w-9 p-0 rounded-full shadow-md" 
+            title={blog.published ? "Unpublish" : "Publish"}
+            onClick={(e) => {
+              e.preventDefault()
+              handleTogglePublish(blog.id, blog.published)
+            }}
+          >
+            {blog.published ? <EyeOff className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+          </Button>
           <Link to={`/edit/${blog.id}`}>
             <Button size="sm" variant="secondary" className="h-9 w-9 p-0 rounded-full shadow-md" title="Edit story">
               <Edit2 className="h-4 w-4" />
