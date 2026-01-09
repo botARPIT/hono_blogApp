@@ -32,20 +32,8 @@ apiClient.interceptors.response.use(
         return response
     },
     (error: AxiosError) => {
-        // Handle specific error codes
-        if (error.response?.status === 401) {
-            // Could dispatch to auth context or redirect
-            console.warn('Unauthorized request - user may need to re-authenticate')
-        }
-
-        if (error.response?.status === 403) {
-            console.warn('Forbidden - user does not have permission')
-        }
-
-        if (error.response?.status && error.response.status >= 500) {
-            console.error('Server error:', error.response?.data)
-        }
-
+        // Error handling is done by the calling code
+        // Could add error reporting service here (e.g., Sentry)
         return Promise.reject(error)
     }
 )

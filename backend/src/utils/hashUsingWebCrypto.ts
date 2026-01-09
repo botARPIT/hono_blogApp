@@ -3,7 +3,6 @@ import { hexToBytes } from "./hexToBytes"
 
 async function hashPassword(password: string): Promise<string> {
     //Encoding the password to array buffer
-    const start = performance.now()
     const encoder = new TextEncoder()
     const passwordBuffer = encoder.encode(password)
 

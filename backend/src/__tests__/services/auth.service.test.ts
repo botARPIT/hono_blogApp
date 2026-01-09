@@ -3,12 +3,8 @@ import * as authRepo from '../../repositories/auth.repository'
 import { createAuthService } from '../../services/auth.service'
 import * as jwtUtil from '../../utils/jwt'
 import * as hashUtil from '../../utils/hashUsingWebCrypto'
-import { setCookies } from '../../utils/setCookies'
-import { Environment } from 'vite'
-import { EnvironmentVariables } from '../../types/env.types'
 import { AuthProvider } from '@prisma/client/edge'
-import { ExistingUserDTO } from '../../types/user.types'
-import { AppError, BadRequestError } from '../../errors/app-error'
+import { AppError } from '../../errors/app-error'
 
 vi.mock('../../repositories/auth.repository')
 vi.mock('../../utils/jwt')
@@ -16,14 +12,17 @@ vi.mock('../../utils/hashUsingWebCrypto')
 vi.mock('../../utils/setCookies')
 
 describe('Testing the auth service', () => {
-    const mockedEnv: EnvironmentVariables = {
+    const mockedEnv = {
         DATABASE_URL: "abc",
         JWT_ACCESS_SECRET: "abc",
         JWT_REFRESH_SECRET: "abc",
         GOOGLE_CLIENT_ID: "abc",
         GOOGLE_CLIENT_SECRET: "abc",
         REDIRECT_URI: "abc",
-        RATE_LIMIT_KV: "abc"
+        FRONTEND_REDIRECT_URL: "abc",
+        FRONTEND_ORIGIN: "http://localhost:5173",
+        ENVIRONMENT: "development" as const,
+        RATE_LIMIT_KV: {} as KVNamespace<string>
     }
 
     beforeEach(() => {
@@ -168,7 +167,8 @@ describe('Testing the auth service', () => {
         }
         const mockedTokens = {
             accessToken: "This is mocked access token",
-            refreshToken: "This is mocked refresh token"
+            refreshToken: "This is mocked refresh token",
+            name: "Test name"  // signin now returns name as well
         }
 
         const mockedPayload = {

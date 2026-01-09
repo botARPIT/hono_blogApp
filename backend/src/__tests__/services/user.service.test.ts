@@ -1,21 +1,22 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createUserService } from "../../services/user.service";
-import { EnvironmentVariables } from '../../types/env.types';
 import * as userRepo from '../../repositories/user.repository'
 import { AppError } from '../../errors/app-error';
-import { BlogTag } from '@prisma/client/edge';
 
 vi.mock('../../repositories/user.repository')
 describe('Tests for user service', () => {
-    const mockedEnv: EnvironmentVariables = {
+    const mockedEnv = {
         DATABASE_URL: "abc",
         JWT_ACCESS_SECRET: "abc",
         JWT_REFRESH_SECRET: "abc",
         GOOGLE_CLIENT_ID: "abc",
         GOOGLE_CLIENT_SECRET: "abc",
         REDIRECT_URI: "abc",
-        RATE_LIMIT_KV: "abc"
+        FRONTEND_REDIRECT_URL: "abc",
+        FRONTEND_ORIGIN: "http://localhost:5173",
+        ENVIRONMENT: "development" as const,
+        RATE_LIMIT_KV: {} as KVNamespace<string>
     }
     beforeEach(() => {
         vi.clearAllMocks()
@@ -24,6 +25,7 @@ describe('Tests for user service', () => {
     describe("tests for getProfileInfo method", () => {
         it('should return the user profile', async () => {
             const mockedUserDetails = {
+                id: "123",
                 name: "abc",
                 email: "abc@mail.com",
                 createdAt: new Date()
@@ -43,35 +45,19 @@ describe('Tests for user service', () => {
         })
     })
 
-    describe('tests for getUser blogs method', () => {
-        it('should return user blogs', async () => {
-            const mockedUserBlogs = [{
-                id: '1',
-                title: 'This is test title',
-                content: 'This is test content',
-                createdAt: new Date(),
-                tag: BlogTag.GAMING,
-                like: 2
-            }, {
-                id: '2',
-                title: 'This is test title2',
-                content: 'This is test content2',
-                createdAt: new Date(),
-                tag: BlogTag.PHILOSOPHY,
-                like: 6
-            }]
+    describe("tests for updateProfile method", () => {
+        it('should update and return the user profile', async () => {
+            const mockedUpdatedUser = {
+                id: "123",
+                name: "Updated Name",
+                email: "updated@mail.com",
+                createdAt: new Date()
+            }
+            vi.mocked(userRepo.updateProfile).mockResolvedValue(mockedUpdatedUser)
 
-            vi.mocked(userRepo.getUserBlogs).mockResolvedValue(mockedUserBlogs)
-            const result = await service.getBlogs('user123')
-            expect(result).toEqual(mockedUserBlogs)
-            expect(userRepo.getUserBlogs).toHaveBeenCalledWith('user123', mockedEnv.DATABASE_URL)
-        })
-
-        it('should throw NotFound Error if user has no blogs', async () => {
-            vi.mocked(userRepo.getUserBlogs).mockResolvedValue(null)
-            await expect(service.getBlogs('user445')).rejects.toThrow("No blogs found for the user")
-            await expect(service.getBlogs('user445')).rejects.toBeInstanceOf(AppError)
-            expect(userRepo.getUserBlogs).toHaveBeenCalledWith('user445', mockedEnv.DATABASE_URL)
+            const result = await service.updateProfile("123", { name: "Updated Name" })
+            expect(result).toEqual(mockedUpdatedUser)
+            expect(userRepo.updateProfile).toHaveBeenCalledWith("123", { name: "Updated Name" }, mockedEnv.DATABASE_URL)
         })
     })
 })

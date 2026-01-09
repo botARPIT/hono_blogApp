@@ -1,7 +1,6 @@
 
-import { AppError, BadRequestError, ErrorCode, ServiceName } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
-import { CreatedUserDTO, ExistingUserDTO, UserSignUpDTO } from "../types/user.types";
+import { CreatedUserDTO, ExistingUserDTO } from "../types/user.types";
 import { prismaErrorObject, prismaErrorWrapper } from "../errors/prismaErrorWrapper";
 import { AuthProvider } from "@prisma/client/edge";
 
@@ -14,7 +13,7 @@ export async function createUser(name: string, email: string, password: string |
                 email,
                 password,
                 authProvider
-            }, 
+            },
             select: {
                 id: true,
                 name: true,
@@ -22,10 +21,10 @@ export async function createUser(name: string, email: string, password: string |
                 createdAt: true
             }
         })
-        if(!user) return null
-         return user 
+        if (!user) return null
+        return user
     } catch (error) {
-         throw prismaErrorWrapper(error as prismaErrorObject)
+        throw prismaErrorWrapper(error as prismaErrorObject)
     }
 }
 
@@ -35,7 +34,7 @@ export async function findUniqueUser(email: string, dbUrl: string): Promise<Exis
         const user = await prisma.user.findUnique({
             where: {
                 email
-            }, 
+            },
             select: {
                 id: true,
                 name: true,
@@ -44,8 +43,8 @@ export async function findUniqueUser(email: string, dbUrl: string): Promise<Exis
                 email: true
             }
         })
-        if(!user) return null
-        return user 
+        if (!user) return null
+        return user
     } catch (error) {
         throw prismaErrorWrapper(error as prismaErrorObject)
     }

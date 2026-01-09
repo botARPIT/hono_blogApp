@@ -1,7 +1,6 @@
 
 import { Hono } from "hono";
 import { createUserService } from "../services/user.service";
-import 'dotenv/config'
 import { Bindings } from '../types/env.types';
 import createController from "../controllers/user.controller";
 import { handleError } from "../errors/handle-error";
@@ -41,7 +40,9 @@ userRouter.patch('/update_profile', async (c) => {
 
 userRouter.post("/logout", async (c) => {
    try {
-
+      // Clear the auth token cookie
+      c.header('Set-Cookie', 'token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0')
+      return c.json({ message: "Logged out successfully" }, 200)
    } catch (error) {
       return handleError(c, error)
    }

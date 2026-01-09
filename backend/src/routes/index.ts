@@ -18,6 +18,15 @@ import { WorkersKVStore } from "@hono-rate-limiter/cloudflare"
 import { getAllowedOrigins } from '../config';
 const mainRouter = new Hono<{ Bindings: Bindings }>();
 
+// Health check endpoint - BEFORE middleware so it works without env vars
+// This is important for load balancer health checks and CI/CD pipelines
+mainRouter.get("/health", (c) => {
+    return c.json({
+        status: "ok",
+        timestamp: new Date().toISOString()
+    })
+})
+
 mainRouter.use("*", secureHeaders())
 
 // CSRF protection - dynamically configure origins based on environment
@@ -41,7 +50,7 @@ mainRouter.use("/*", (c, next) => {
 mainRouter.use((c: Context, next: Next) =>
     rateLimiter<{ Bindings: Bindings }>({
         windowMs: 15 * 60 * 1000,
-        limit: 500, // Increased limit for development
+        limit: 100,
         standardHeaders: 'draft-6',
         keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? c.req.header('x-forwarded-for') ?? "global",
         store: new WorkersKVStore({ namespace: c.env.RATE_LIMIT_KV })
@@ -50,23 +59,8 @@ mainRouter.use((c: Context, next: Next) =>
 )
 
 mainRouter.use("/*", logger())
-// mainRouter.use("/*", timeout(5000))
+mainRouter.use("/*", timeout(10000)) // 10 second timeout for requests
 mainRouter.onError(handleErrorMiddleware)
-// mainRouter.onError((err, c) => {
-//     console.log("Dummy onError hit")
-// return c.json({
-//     message: "This is dummy error hit"
-// }, 500)
-// }
-// )
-
-// Adding a health check endpoint
-mainRouter.get("/health", (c) => {
-    return c.json({
-        status: "ok",
-        timestamp: new Date().toISOString()
-    })
-})
 
 mainRouter.route("api/v1/user", userRouter)
 mainRouter.route("api/v1/blog", blogRouter)

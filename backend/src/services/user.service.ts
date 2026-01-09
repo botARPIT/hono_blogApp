@@ -1,12 +1,7 @@
 
 import { UserDetailsDTO } from "../types/user.types"
 import { getUserProfile, updateProfile } from "../repositories/user.repository";
-import { EnvironmentVariables } from "../types/env.types";
-
-
-
-import { GetBlogDTO } from "../types/blog.types";
-import { NotFoundError, ServiceName } from "../errors/app-error";
+import { NotFoundError } from "../errors/app-error";
 import { AppConfig } from "../config";
 
 class UserService {

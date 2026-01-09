@@ -33,12 +33,12 @@ export enum ServiceName {
 export class AppError extends Error {
     public readonly statusCode: ContentfulStatusCode
     public readonly errorCode: ErrorCode
-    public readonly meta?: Record<string, any>
+    public readonly meta?: Record<string, unknown>
     public readonly timestamp: number
     public readonly severityLevel?: SeverityLevel
     public readonly serviceName?: ServiceName
     public readonly isOperational: boolean
-    constructor(message: string, statusCode = 500 as ContentfulStatusCode, errorCode: ErrorCode = ErrorCode.INTERNAL_ERROR, isOperational: boolean, timestamp = Date.now(), severityLevel: SeverityLevel = SeverityLevel.LOW, meta?: Record<string, any> , serviceName?: ServiceName) {
+    constructor(message: string, statusCode = 500 as ContentfulStatusCode, errorCode: ErrorCode = ErrorCode.INTERNAL_ERROR, isOperational: boolean, timestamp = Date.now(), severityLevel: SeverityLevel = SeverityLevel.LOW, meta?: Record<string, unknown>, serviceName?: ServiceName) {
         super(message)
         Error.captureStackTrace(this, this.constructor)
         this.statusCode = statusCode;
@@ -48,55 +48,55 @@ export class AppError extends Error {
         this.serviceName = serviceName;
         this.timestamp = timestamp;
         this.isOperational = isOperational
-        
+
         Object.setPrototypeOf(this, AppError.prototype) //Ensures AppError instance of Error == true
     }
 }
 
 export class ValidationError extends AppError {
-    constructor(message : string = "Validation Failed", serviceName: ServiceName, meta?: Record<string, any>, ) {
-        super(message, 400, ErrorCode.VALIDATION_FAILED, true, Date.now(),  SeverityLevel.LOW, meta , serviceName )
+    constructor(message: string = "Validation Failed", serviceName: ServiceName, meta?: Record<string, unknown>,) {
+        super(message, 400, ErrorCode.VALIDATION_FAILED, true, Date.now(), SeverityLevel.LOW, meta, serviceName)
     }
 }
 
 export class NotFoundError extends AppError {
-    constructor(message: string = "Resource not found", meta: Record<string, any> = {reason : "Resource does not exist"}) {
+    constructor(message: string = "Resource not found", meta: Record<string, unknown> = { reason: "Resource does not exist" }) {
         super(message, 404, ErrorCode.NOT_FOUND, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.BUSINESS)
     }
 }
 
 export class UnauthorizedError extends AppError {
-    constructor(message: string = "Unauthorized access to the resource", meta: Record<string, any> = {reason : "You don't have necessary permissions"} ) {
+    constructor(message: string = "Unauthorized access to the resource", meta: Record<string, unknown> = { reason: "You don't have necessary permissions" }) {
         super(message, 401, ErrorCode.UNAUTHORIZED, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.MIDDLEWARE)
     }
 }
 
 export class BadRequestError extends AppError {
-    constructor(message: string = "Bad Request", serviceName: ServiceName ,meta?: Record<string, any> ) {
-        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(), SeverityLevel.LOW, meta,  serviceName )
+    constructor(message: string = "Bad Request", serviceName: ServiceName, meta?: Record<string, unknown>) {
+        super(message, 400, ErrorCode.BAD_REQUEST, true, Date.now(), SeverityLevel.LOW, meta, serviceName)
     }
 }
 
 export class ZodValidationError extends AppError {
-    constructor(message: string = "Zod validation error", meta: Record<string, any>) {
+    constructor(message: string = "Zod validation error", meta: Record<string, unknown>) {
         super(message, 400, ErrorCode.ZOD_ERROR, true, Date.now(), SeverityLevel.LOW, meta, ServiceName.CONTROLLER)
     }
-}   
+}
 
-export class AuthError extends AppError{
-    constructor(message: string = "Authentication Error",isOperational: boolean, meta: Record<string, string> ){
+export class AuthError extends AppError {
+    constructor(message: string = "Authentication Error", isOperational: boolean, meta: Record<string, string>) {
         super(message, 401, ErrorCode.AUTH_ERROR, isOperational, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.BUSINESS)
     }
 }
 
 export class DBError extends AppError {
-    constructor(message: string , meta: Record<string, any>) {
+    constructor(message: string, meta: Record<string, unknown>) {
         super(message, 400, ErrorCode.DB_ERROR, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.DB)
     }
 }
 
 export class ConfigError extends AppError {
-    constructor(message: string = "Configuration Error", meta?: Record<string, any>) {
+    constructor(message: string = "Configuration Error", meta?: Record<string, unknown>) {
         super(message, 500, ErrorCode.CONFIG_ERROR, true, Date.now(), SeverityLevel.MEDIUM, meta, ServiceName.ROUTER)
     }
 }

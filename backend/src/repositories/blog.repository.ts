@@ -1,8 +1,4 @@
-import { ServiceName } from './../errors/app-error';
-
-import { NotFoundError, ValidationError } from "../errors/app-error";
 import { getPrismaClient } from "../lib/prisma";
-import { Bindings } from "../types/env.types";
 import { AddBlogDTO, BlogTag, CreatedBlogDTO, DeletedBlogDTO, GetBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 import { prismaErrorWrapper } from '../errors/prismaErrorWrapper';
 import type { prismaErrorObject } from '../errors/prismaErrorWrapper';
@@ -65,7 +61,7 @@ export async function updateBlog(dto: UpdateBlogDTO, blogId: string, authorId: s
 
 export async function getAllBlogs(page: number, dbUrl: AppConfig['DATABASE_URL']): Promise<GetBlogDTO[]> {
     try {
-        { !page || page < 0 ? page = 1 : page }
+        if (!page || page < 0) page = 1
         const prisma = getPrismaClient(dbUrl)
         const allBlogs = await prisma.blog.findMany({
             where: {
@@ -148,7 +144,6 @@ export async function deleteBlog(id: string, authorId: string, dbUrl: AppConfig[
 
 export async function getBlogById(id: string, dbUrl: AppConfig['DATABASE_URL']): Promise<GetBlogDTO | null> {
     try {
-        const start = performance.now()
         const prisma = getPrismaClient(dbUrl)
         const blog = await prisma.blog.findUnique({
             where: {

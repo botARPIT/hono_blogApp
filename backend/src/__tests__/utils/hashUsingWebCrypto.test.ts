@@ -1,16 +1,12 @@
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { hashPassword } from '../../utils/hashUsingWebCrypto'
-import { hash } from 'bcryptjs'
 vi.mock('../../utils/hexToBytes')
 
 describe('Password hashing security tests', () => {
-    let mockedCrypto: any
-    let originalCrypto: Crypto
+    let mockedCrypto: { subtle: { importKey: ReturnType<typeof vi.fn>; deriveBits: ReturnType<typeof vi.fn> }; getRandomValues: ReturnType<typeof vi.fn> }
     beforeEach(() => {
         vi.clearAllMocks()
-        //Saving the original type
-        originalCrypto = crypto
 
         //Mocking the crypto API
         mockedCrypto = {
@@ -48,8 +44,6 @@ describe('Password hashing security tests', () => {
             )
             const hash1 = await hashPassword("password")
             const hash2 = await hashPassword('password')
-            console.log(hash1)
-            console.log(hash2)
             expect(hash1).not.toBe(hash2)
             expect(hash1).toContain("01020304")
             expect(hash2).toContain('05060708')

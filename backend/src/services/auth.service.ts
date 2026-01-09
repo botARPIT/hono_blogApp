@@ -26,7 +26,7 @@ class AuthService {
         const payload = JSON.parse(atob(tokenParts[1].replace(/-/g, '+').replace(/_/g, '/')))
 
         // Extract user details from ID token claims
-        const { sub, email, name } = payload as { sub: string; email: string; name: string }
+        const { sub: _sub, email, name } = payload as { sub: string; email: string; name: string }
 
         if (!email) {
             throw new AuthError("Email not found in ID token", false, { message: "Please ensure you've granted email permission" })

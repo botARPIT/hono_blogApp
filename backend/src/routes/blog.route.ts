@@ -112,17 +112,4 @@ blogRouter.get("/like-status/:id", async (c) => {
    }
 })
 
-// blogRouter.post("/uploadImage", async (c) => {
-//    console.log("request received")
-//    const base64 = await c.req.text()
-//    const image = base64.split(',')[1]
-
-//    const userId = "123"
-//   await  getStorageInfo()
-//    const result = await uploadFile(image, userId)
-//    console.log("This is result", result)
-//    return c.json({result })
-
-// })
-
 export { blogRouter }

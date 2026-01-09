@@ -2,18 +2,11 @@
 import { Bindings } from './../types/env.types';
 import { Hono } from "hono";
 import crypto from "crypto";
-import { fetchTokenFromGoogle } from '../auth/auth';
-import { GoogleAuthResponse } from '../types/auth.types';
-import { Token } from '../types/jwt.types';
-import { setCookies } from '../utils/setCookies';
 import { createAuthService } from '../services/auth.service';
 import createAuthController from '../controllers/auth.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
 import { handleError } from '../errors/handle-error';
 import { deleteCookie } from 'hono/cookie';
 import { getConfig } from '../config'
-import { rateLimiter } from 'hono-rate-limiter';
-import { WorkersKVStore } from '@hono-rate-limiter/cloudflare';
 import { generateCodeChallenge, generateCodeVerifier, setPKCECookies } from '../utils/pkce';
 const authRouter = new Hono<{ Bindings: Bindings }>()
 
@@ -41,6 +34,7 @@ authRouter.get('/google/callback', async (c) => {
       // Otherwise redirect to frontend
       return c.redirect(config.FRONTEND_REDIRECT_URL)
    } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("OAuth callback error:", error)
       return c.json({ message: "OAuth authentication failed", error: String(error) }, 500)
    }

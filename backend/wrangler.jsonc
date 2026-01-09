@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "blogify-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-07-07",
+  "compatibility_flags": [
+    "nodejs_compat",
+  ],
+  "vars": {  
+    "GOOGLE_CLIENT_ID": "416523459097-41vnr3kbainefavt6ubqqkb61bfjs0es.apps.googleusercontent.com",
+    "ENVIRONMENT": "production",
+    "REDIRECT_URI": "https://backend.fevoro2226.workers.dev/api/v1/auth/google/callback",
+    "FRONTEND_REDIRECT_URL": "https://blogify.arpitdev.site"
+
+  },
+
+  "placement": {
+      "mode" : "smart"  
+    },
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "a117436b6cca4cd68894431e8f140c8c"
+    }
+  ],
+  // "r2_buckets": [
+  //   {
+  //     "binding": "MY_BUCKET",
+  //     "bucket_name": "my-bucket"
+  //   }
+  // ],
+  // "d1_databases": [
+  //   {
+  //     "binding": "MY_DB",
+  //     "database_name": "my-database",
+  //     "database_id": ""
+  //   }
+  // ],
+  // "ai": {
+  //   "binding": "AI"
+  // },
+  "observability": {
+    "enabled": true,
+    // "head_sampling_rate": 1
+  }
+}

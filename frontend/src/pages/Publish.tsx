@@ -17,7 +17,6 @@ const Publish = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tag, setTag] = useState<BlogTagType>(BlogTag.GENERAL)
-  const [thumbnail, setThumbnail] = useState('')
   const [loading, setLoading] = useState(false)
   const [savingDraft, setSavingDraft] = useState(false)
   const navigate = useNavigate()
@@ -66,7 +65,7 @@ const Publish = () => {
         { 
           title, 
           content: content || '<p>Draft content...</p>', 
-          thumbnail: thumbnail || 'https://via.placeholder.com/800x400', 
+          thumbnail: 'https://via.placeholder.com/800x400', // TODO: Implement thumbnail upload
           tag,
           published: !asDraft
         },
@@ -128,16 +127,17 @@ const Publish = () => {
                 </Select>
               </div>
 
+              {/* TODO: Thumbnail upload feature - disabled for now
               <div className="space-y-2">
                 <Label htmlFor="thumbnail">Thumbnail URL (optional)</Label>
                 <Input
                   id="thumbnail"
-                  value={thumbnail}
-                  onChange={(e) => setThumbnail(e.target.value)}
                   placeholder="https://example.com/image.jpg"
                   type="url"
+                  disabled
                 />
               </div>
+              */}
 
               <div className="space-y-2">
                 <Label htmlFor="content">Content</Label>

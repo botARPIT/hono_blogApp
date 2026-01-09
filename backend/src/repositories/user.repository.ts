@@ -1,8 +1,6 @@
 import { getPrismaClient } from "../lib/prisma";
 import { UserDetailsDTO } from "../types/user.types";
 import { prismaErrorObject, prismaErrorWrapper } from "../errors/prismaErrorWrapper";
-import { Bindings } from "../types/env.types";
-import { GetBlogDTO } from "../types/blog.types";
 import { AppConfig } from "../config";
 
 export async function getUserProfile(id: string, dbUrl: AppConfig['DATABASE_URL']): Promise<UserDetailsDTO | null> {

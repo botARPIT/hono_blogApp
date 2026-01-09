@@ -1,8 +1,8 @@
 import { ZodError } from "zod"
 
-export type ValidationError  ={
-    field? : string,
-    message: ZodError
+export type ValidationError = {
+    field?: string,
+    error: ZodError
 }
 
 export type AuthError = {

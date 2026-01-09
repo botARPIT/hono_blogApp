@@ -14,12 +14,14 @@ dist/
 # deps
 node_modules/
 .wrangler
-wrangler.jsonc
+
 # env
 .env
 .env.production
 .dev.vars
-
+# files
+backend/src/repositories/blog.thumbnail.repository.ts
+backend/src/utils/hash.ts
 # logs
 logs/
 *.log
