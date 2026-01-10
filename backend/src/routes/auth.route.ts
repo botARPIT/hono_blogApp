@@ -63,13 +63,17 @@ authRouter.get('/google', async (c) => {
 })
 
 authRouter.get('/refresh', async (c) => {
-   const config = getConfig(c.env)
-   if (!c.env) { return c.json({ message: "Server configuration error" }, 500) }
-   const authService = createAuthService(config)
-   const authController = createAuthController(authService)
-   const res = await authController.generateRefreshToken(c)
-   return c.json({ message: res })
-
+   try {
+      const config = getConfig(c.env)
+      if (!c.env) { return c.json({ message: "Server configuration error" }, 500) }
+      const authService = createAuthService(config)
+      const authController = createAuthController(authService)
+      const res = await authController.generateRefreshToken(c)
+      // If we get here, refresh was successful
+      return c.json({ message: "Token refreshed successfully", ...res })
+   } catch (error) {
+      return handleError(c, error)
+   }
 })
 
 
