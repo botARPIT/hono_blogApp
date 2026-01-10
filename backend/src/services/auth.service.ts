@@ -56,14 +56,25 @@ class AuthService {
     }
 
     async getRefreshToken(c: Context, refreshToken: string) {
-        const payload = await jwtVerify(refreshToken, this.env.JWT_REFRESH_SECRET)
-        if (!payload) throw new AuthError("Invalid/expired token", true, { message: "Try to signin" })
-        if (payload) {
+        try {
+            const decodedPayload = await jwtVerify(refreshToken, this.env.JWT_REFRESH_SECRET)
+            if (!decodedPayload) throw new AuthError("Invalid/expired token", true, { message: "Try to signin" })
+
+            // Extract only the user-specific fields, stripping JWT metadata (exp, iat, etc.)
+            const payload = {
+                id: decodedPayload.id,
+                name: decodedPayload.name,
+                role: decodedPayload.role
+            }
+
             const token = generateTokens(payload, this.env.JWT_ACCESS_SECRET, this.env.JWT_REFRESH_SECRET)
             if (!token) throw new AuthError("Unable to generate token", false, { message: "Try to signin" })
             setCookies(c, token)
+            return { success: true }
+        } catch (error) {
+            // jwt.verify throws TokenExpiredError or JsonWebTokenError
+            throw new AuthError("Invalid/expired token", true, { message: "Session expired, please signin again" })
         }
-        return
     }
 
     async signup(dto: UserSignUpDTO): Promise<Token> {
