@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { BACKEND_URL } from '../config'
 import { toast } from 'sonner'
 import { RichTextEditor } from '../components/RichTextEditor'
 import { Button } from '../components/ui/button'
@@ -12,14 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import Appbar from '../components/Appbar'
 import { BlogTag, type BlogTag as BlogTagType } from '../types/blog'
 import { Save, Send } from 'lucide-react'
+import { useCreateBlog } from '../hooks/queries'
 
 const Publish = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tag, setTag] = useState<BlogTagType>(BlogTag.GENERAL)
-  const [loading, setLoading] = useState(false)
-  const [savingDraft, setSavingDraft] = useState(false)
   const navigate = useNavigate()
+  
+  // Use the mutation hook - it handles cache invalidation automatically
+  const createBlogMutation = useCreateBlog()
 
   const validateForm = (isDraft: boolean = false) => {
     if (!title.trim()) {
@@ -51,43 +51,22 @@ const Publish = () => {
     return true
   }
 
-  const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
+  const handleSubmit = (e: React.FormEvent, asDraft: boolean = false) => {
     e.preventDefault()
     
     if (!validateForm(asDraft)) return
 
-    const setLoadingState = asDraft ? setSavingDraft : setLoading
-    setLoadingState(true)
-
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/v1/blog/addBlog`,
-        { 
-          title, 
-          content: content || '<p>Draft content...</p>', 
-          thumbnail: 'https://via.placeholder.com/800x400', // TODO: Implement thumbnail upload
-          tag,
-          published: !asDraft
-        },
-        { withCredentials: true }
-      )
-      
-      if (asDraft) {
-        toast.success('Draft saved successfully! You can find it in My Blogs.')
-        navigate('/my-blogs')
-      } else {
-        toast.success('Blog published successfully!')
-        navigate(`/blog/${response.data.id}`)
-      }
-    } catch (error) {
-      const message = axios.isAxiosError(error) 
-        ? error.response?.data?.error?.message 
-        : asDraft ? 'Failed to save draft' : 'Failed to publish blog'
-      toast.error(message || (asDraft ? 'Failed to save draft' : 'Failed to publish blog'))
-    } finally {
-      setLoadingState(false)
-    }
+    // Use mutation - it will invalidate cache and navigate on success
+    createBlogMutation.mutate({
+      title, 
+      content: content || '<p>Draft content...</p>', 
+      thumbnail: 'https://via.placeholder.com/800x400', // TODO: Implement thumbnail upload
+      tag,
+      published: !asDraft
+    })
   }
+
+  const isLoading = createBlogMutation.isPending
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,28 +130,28 @@ const Publish = () => {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button 
                   type="submit" 
-                  disabled={loading || savingDraft} 
+                  disabled={isLoading} 
                   className="w-full sm:w-auto gap-2 cursor-pointer"
                 >
                   <Send className="h-4 w-4" />
-                  {loading ? 'Publishing...' : 'Publish'}
+                  {isLoading ? 'Publishing...' : 'Publish'}
                 </Button>
                 <Button 
                   type="button" 
                   variant="secondary"
-                  disabled={loading || savingDraft}
+                  disabled={isLoading}
                   onClick={(e) => handleSubmit(e, true)}
                   className="w-full sm:w-auto gap-2 cursor-pointer"
                 >
                   <Save className="h-4 w-4" />
-                  {savingDraft ? 'Saving...' : 'Save as Draft'}
+                  {isLoading ? 'Saving...' : 'Save as Draft'}
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={() => navigate('/blogs')} 
                   className="w-full sm:w-auto cursor-pointer"
-                  disabled={loading || savingDraft}
+                  disabled={isLoading}
                 >
                   Cancel
                 </Button>
@@ -186,4 +165,3 @@ const Publish = () => {
 }
 
 export default Publish
-

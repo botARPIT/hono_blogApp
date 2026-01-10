@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { BACKEND_URL } from '../config'
 import { toast } from 'sonner'
 import { RichTextEditor } from '../components/RichTextEditor'
 import { Button } from '../components/ui/button'
@@ -9,19 +7,20 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import Appbar from '../components/Appbar'
-import { useBlog } from '../hooks/queries'
+import { useBlog, useUpdateBlog } from '../hooks/queries'
 import Loading from '../components/Loading'
 
 export default function EditBlog() {
   const { id } = useParams<{ id: string }>()
   const { data: blog, isLoading: blogLoading } = useBlog(id || '')
   const navigate = useNavigate()
-
   
+  // Use the mutation hook - it handles cache invalidation automatically
+  const updateBlogMutation = useUpdateBlog()
+
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [thumbnail, setThumbnail] = useState('')
-  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (blog) {
@@ -31,7 +30,7 @@ export default function EditBlog() {
     }
   }, [blog])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!title.trim() || !content.trim()) {
@@ -52,27 +51,15 @@ export default function EditBlog() {
       return
     }
 
-    setSaving(true)
-    try {
-      await axios.patch(
-        `${BACKEND_URL}/api/v1/blog/updateBlog/${id}`,
-        { 
-          title, 
-          content, 
-          thumbnail: thumbnail || undefined 
-        },
-        { withCredentials: true }
-      )
-      toast.success('Blog updated successfully!')
-      navigate(`/blog/${id}`)
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error?.message
-        : 'Failed to update blog'
-      toast.error(message || 'Failed to update blog')
-    } finally {
-      setSaving(false)
-    }
+    if (!id) return
+
+    // Use mutation - it will invalidate cache and navigate on success
+    updateBlogMutation.mutate({
+      id,
+      title, 
+      content, 
+      thumbnail: thumbnail || undefined 
+    })
   }
 
   if (blogLoading) {
@@ -94,6 +81,8 @@ export default function EditBlog() {
       </div>
     )
   }
+
+  const isLoading = updateBlogMutation.isPending
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,8 +127,8 @@ export default function EditBlog() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
-                <Button type="submit" disabled={saving} className="w-full sm:w-auto">
-                  {saving ? 'Saving...' : 'Save Changes'}
+                <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                  {isLoading ? 'Saving...' : 'Save Changes'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate(`/blog/${id}`)} className="w-full sm:w-auto">
                   Cancel
@@ -152,5 +141,3 @@ export default function EditBlog() {
     </div>
   )
 }
-
-

@@ -1,5 +1,4 @@
-import axios from "axios"
-import { BACKEND_URL } from "../config"
+import api from "../lib/axios"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "./ui/button"
@@ -9,18 +8,23 @@ import { useQueryClient } from "@tanstack/react-query"
 
 export const LogoutButton = () => {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { clearSession } = useAuth()
   const queryClient = useQueryClient()
   
   async function handleLogout() {
     try {
-      await axios.post(`${BACKEND_URL}/api/v1/auth/logout`, {}, { withCredentials: true })
-      logout()
+      await api.post('/api/v1/auth/logout')
+      clearSession()
       queryClient.clear()
       toast.success("Logged out successfully")
       navigate('/signin')
     } catch {
-      toast.error("Unable to logout, try again")
+      // Even if backend fails (e.g., expired token), we should still logout locally
+      // This is the key fix for when users can't logout due to expired tokens
+      clearSession()
+      queryClient.clear()
+      toast.success("Logged out successfully")
+      navigate('/signin')
     }
   }
 

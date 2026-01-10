@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { BACKEND_URL } from '../config'
+import api from '../lib/axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuth } from '../context/AuthContext'
@@ -17,26 +17,20 @@ export const queryKeys = {
     userProfile: ['userProfile'] as const,
 }
 
-// API Functions
+// API Functions - use centralized axios instance with token refresh
 const fetchBlogs = async (page: number = 1): Promise<BlogDTO[]> => {
-    const { data } = await axios.get(`${BACKEND_URL}/api/v1/blog/blogs/${page}`, {
-        withCredentials: true
-    })
+    const { data } = await api.get(`/api/v1/blog/blogs/${page}`)
     return Array.isArray(data) ? data : []
 }
 
 const fetchBlog = async (id: string): Promise<BlogDTO> => {
-    const { data } = await axios.get(`${BACKEND_URL}/api/v1/blog/blog/${id}`, {
-        withCredentials: true
-    })
+    const { data } = await api.get(`/api/v1/blog/blog/${id}`)
     return data
 }
 
 const fetchUserBlogs = async (): Promise<BlogDTO[]> => {
     try {
-        const { data } = await axios.get(`${BACKEND_URL}/api/v1/blog/my-blogs`, {
-            withCredentials: true
-        })
+        const { data } = await api.get(`/api/v1/blog/my-blogs`)
         // Backend returns array directly, not wrapped in { blogs: [...] }
         return Array.isArray(data) ? data : []
     } catch (error) {
@@ -48,48 +42,57 @@ const fetchUserBlogs = async (): Promise<BlogDTO[]> => {
 }
 
 const fetchUserProfile = async (): Promise<UserProfile> => {
-    const { data } = await axios.get(`${BACKEND_URL}/api/v1/user/profile_info`, {
-        withCredentials: true
-    })
+    const { data } = await api.get(`/api/v1/user/profile_info`)
     return data.userProfile
 }
 
 const updateUserProfile = async (data: UpdateProfileRequest): Promise<UserProfile> => {
-    const response = await axios.patch(`${BACKEND_URL}/api/v1/user/update_profile`, data, {
-        withCredentials: true
-    })
+    const response = await api.patch(`/api/v1/user/update_profile`, data)
     return response.data
 }
 
 const deleteBlogApi = async (id: string): Promise<void> => {
-    await axios.delete(`${BACKEND_URL}/api/v1/blog/delete/${id}`, {
-        withCredentials: true
-    })
+    await api.delete(`/api/v1/blog/delete/${id}`)
 }
 
 const likeBlogApi = async (id: string): Promise<{ like: number; hasLiked: boolean }> => {
-    const { data } = await axios.post(`${BACKEND_URL}/api/v1/blog/like/${id}`, {}, {
-        withCredentials: true
-    })
+    const { data } = await api.post(`/api/v1/blog/like/${id}`, {})
     return data
 }
 
 const checkLikeStatusApi = async (id: string): Promise<{ hasLiked: boolean }> => {
-    const { data } = await axios.get(`${BACKEND_URL}/api/v1/blog/like-status/${id}`, {
-        withCredentials: true
-    })
+    const { data } = await api.get(`/api/v1/blog/like-status/${id}`)
     // Backend returns boolean directly, wrap it for consistent usage
     return { hasLiked: typeof data === 'boolean' ? data : !!data }
 }
 
 const togglePublishBlogApi = async ({ id, published }: { id: string; published: boolean }): Promise<{ published: boolean }> => {
-    const { data } = await axios.patch(`${BACKEND_URL}/api/v1/blog/updateBlog/${id}`, { published }, {
-        withCredentials: true
-    })
+    const { data } = await api.patch(`/api/v1/blog/updateBlog/${id}`, { published })
     return data
 }
 
+// Types for create/update blog
+interface CreateBlogInput {
+    title: string
+    content: string
+    thumbnail?: string
+    tag: string
+    published: boolean
+}
+
+const createBlogApi = async (input: CreateBlogInput): Promise<BlogDTO> => {
+    const { data } = await api.post(`/api/v1/blog/addBlog`, input)
+    return data
+}
+
+const updateBlogApi = async ({ id, ...data }: { id: string } & Partial<CreateBlogInput>): Promise<BlogDTO> => {
+    const response = await api.patch(`/api/v1/blog/updateBlog/${id}`, data)
+    return response.data
+}
+
 // Hooks with React Query
+// Note: 401 handling is now done by the axios interceptor which attempts token refresh
+// If refresh fails, the interceptor dispatches 'auth:sessionExpired' event
 export function useBlogs(page: number = 1) {
     const navigate = useNavigate()
 
@@ -98,6 +101,7 @@ export function useBlogs(page: number = 1) {
         queryFn: () => fetchBlogs(page),
         staleTime: 1000 * 60 * 5, // 5 minutes
         retry: (failureCount, error) => {
+            // After axios interceptor tries to refresh, if still 401, don't retry
             if (axios.isAxiosError(error) && error?.response?.status === 401) {
                 navigate('/signin')
                 return false
@@ -369,3 +373,56 @@ export function useTogglePublish() {
         },
     })
 }
+
+export function useCreateBlog() {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+
+    return useMutation({
+        mutationFn: createBlogApi,
+        onSuccess: (data, variables) => {
+            // Invalidate both blogs list and user blogs to ensure fresh data
+            queryClient.invalidateQueries({ queryKey: queryKeys.blogs })
+            queryClient.invalidateQueries({ queryKey: queryKeys.userBlogs })
+
+            if (variables.published) {
+                toast.success('Blog published successfully!')
+                navigate(`/blog/${data.id}`)
+            } else {
+                toast.success('Draft saved successfully! You can find it in My Blogs.')
+                navigate('/my-blogs')
+            }
+        },
+        onError: (error, variables) => {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.error?.message
+                : variables.published ? 'Failed to publish blog' : 'Failed to save draft'
+            toast.error(message || (variables.published ? 'Failed to publish blog' : 'Failed to save draft'))
+        },
+    })
+}
+
+export function useUpdateBlog() {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+
+    return useMutation({
+        mutationFn: updateBlogApi,
+        onSuccess: (_data, variables) => {
+            // Invalidate specific blog, blogs list, and user blogs
+            queryClient.invalidateQueries({ queryKey: queryKeys.blog(variables.id) })
+            queryClient.invalidateQueries({ queryKey: queryKeys.blogs })
+            queryClient.invalidateQueries({ queryKey: queryKeys.userBlogs })
+
+            toast.success('Blog updated successfully!')
+            navigate(`/blog/${variables.id}`)
+        },
+        onError: (error) => {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.error?.message
+                : 'Failed to update blog'
+            toast.error(message || 'Failed to update blog')
+        },
+    })
+}
+
