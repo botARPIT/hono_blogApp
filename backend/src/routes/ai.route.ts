@@ -61,7 +61,6 @@ webhookRouter.use('/*', async (c, next) => {
     const apiKey = c.req.header('X-Internal-API-Key');
     const config = getConfig(c.env);
 
-    // @ts-expect-error - INTERNAL_API_KEY needs to be added to AppConfig
     if (!apiKey || apiKey !== config.INTERNAL_API_KEY) {
         return c.json({ message: 'Unauthorized' }, 401);
     }

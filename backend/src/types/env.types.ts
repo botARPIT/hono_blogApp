@@ -8,7 +8,13 @@ export type Bindings = {
    FRONTEND_REDIRECT_URL: string,
    FRONTEND_ORIGIN: string,
    ENVIRONMENT: 'development' | 'production',
-   RATE_LIMIT_KV: KVNamespace<string>
+   RATE_LIMIT_KV: KVNamespace<string>,
+
+   // AI Integration (optional)
+   BLOGIFY_AI_URL?: string,
+   BLOGIFY_AI_API_KEY?: string,
+   BACKEND_URL?: string,
+   INTERNAL_API_KEY?: string,
 }
 
 export interface EnvironmentVariables {
@@ -21,5 +27,11 @@ export interface EnvironmentVariables {
    FRONTEND_REDIRECT_URL: string,
    FRONTEND_ORIGIN: string,
    ENVIRONMENT: 'development' | 'production',
-   RATE_LIMIT_KV: KVNamespace<string>
+   RATE_LIMIT_KV: KVNamespace<string>,
+
+   // AI Integration (optional)
+   BLOGIFY_AI_URL?: string,
+   BLOGIFY_AI_API_KEY?: string,
+   BACKEND_URL?: string,
+   INTERNAL_API_KEY?: string,
 }

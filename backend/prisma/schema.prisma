@@ -25,6 +25,10 @@ model User {
   isAdmin Boolean @default(false)
   blogs Blog[]
   blogLikes BlogLike[]
+  
+  // AI Integration
+  aiJobs        AIJob[]
+  conversations Conversation[]
 
   @@index([email])
 }
@@ -43,9 +47,13 @@ model Blog{
   like Int @default(0) @db.Integer
   published Boolean @default(false)
   likes BlogLike[]
+  
+  // AI Integration
+  aiJobs        AIJob[]
+  conversations Conversation[]
 
   @@index([id])
-	@@map("Blog")
+  @@map("Blog")
 }
 
 model BlogLike {
@@ -82,4 +90,108 @@ enum AuthProvider {
   NATURE
   WILDLIFE
   GENERAL
+}
+
+// ============================================
+// AI INTEGRATION MODELS
+// ============================================
+
+model AIJob {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @db.Uuid
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Request data
+  topic        String
+  audience     String?
+  tone         String       @default("professional")
+  
+  // Status tracking
+  status       AIJobStatus  @default(PENDING)
+  stage        String?      // "intent", "outline", "research", "writing"
+  progress     Int          @default(0)
+  
+  // Result
+  blogId       String?      @db.Uuid
+  blog         Blog?        @relation(fields: [blogId], references: [id])
+  
+  // Errors
+  errorCode    String?
+  errorMessage String?
+  retryCount   Int          @default(0)
+  
+  // Timestamps
+  createdAt    DateTime     @default(now()) @db.Timestamptz()
+  updatedAt    DateTime     @updatedAt @db.Timestamptz()
+  completedAt  DateTime?    @db.Timestamptz()
+  
+  @@index([userId])
+  @@index([status])
+  @@map("AIJob")
+}
+
+enum AIJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Conversation {
+  id        String             @id @default(uuid()) @db.Uuid
+  userId    String             @db.Uuid
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Context binding
+  blogId    String?            @db.Uuid
+  blog      Blog?              @relation(fields: [blogId], references: [id])
+  
+  // State
+  status    ConversationStatus @default(ACTIVE)
+  title     String?
+  
+  // Messages
+  messages  Message[]
+  
+  createdAt DateTime           @default(now()) @db.Timestamptz()
+  updatedAt DateTime           @updatedAt @db.Timestamptz()
+  
+  @@index([userId])
+  @@index([blogId])
+  @@map("Conversation")
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+model Message {
+  id              String       @id @default(uuid()) @db.Uuid
+  conversationId  String       @db.Uuid
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  role            MessageRole
+  content         String
+  
+  // For assistant messages with commands
+  commands        Json?
+  commandsApplied Boolean      @default(false)
+  
+  // Metadata
+  tokenCount      Int?
+  latencyMs       Int?
+  
+  createdAt       DateTime     @default(now()) @db.Timestamptz()
+  
+  @@index([conversationId])
+  @@map("Message")
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

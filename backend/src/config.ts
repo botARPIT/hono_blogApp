@@ -12,6 +12,12 @@ export type AppConfig = {
     FRONTEND_ORIGIN: string;
     ENVIRONMENT: 'development' | 'production';
     RATE_LIMIT_KV: KVNamespace<string>;
+
+    // AI Integration
+    BLOGIFY_AI_URL: string;
+    BLOGIFY_AI_API_KEY: string;
+    BACKEND_URL: string;
+    INTERNAL_API_KEY: string;
 };
 
 export function getConfig(env: EnvironmentVariables): AppConfig {
@@ -36,8 +42,15 @@ export function getConfig(env: EnvironmentVariables): AppConfig {
         FRONTEND_ORIGIN: env.FRONTEND_ORIGIN,
         ENVIRONMENT: env.ENVIRONMENT || 'development',
         RATE_LIMIT_KV: env.RATE_LIMIT_KV,
+
+        // AI Integration (optional in dev)
+        BLOGIFY_AI_URL: env.BLOGIFY_AI_URL || 'http://localhost:8000',
+        BLOGIFY_AI_API_KEY: env.BLOGIFY_AI_API_KEY || '',
+        BACKEND_URL: env.BACKEND_URL || 'http://localhost:8787',
+        INTERNAL_API_KEY: env.INTERNAL_API_KEY || 'dev-internal-key',
     }
 }
+
 
 // Helper to check if running in production
 export function isProduction(env: EnvironmentVariables): boolean {

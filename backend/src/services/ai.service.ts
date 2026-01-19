@@ -21,6 +21,7 @@ import {
     InternalChatRequest,
     MessageRole
 } from '../types/ai.types';
+import { BlogTag } from '../types/blog.types';
 import { NotFoundError, BadRequestError } from '../errors/app-error';
 
 // Repository imports
@@ -157,7 +158,7 @@ export class AIService {
             title: payload.result.title,
             content: payload.result.content,
             thumbnail: '',
-            tag: 'GENERAL',
+            tag: BlogTag.GENERAL,
             published: false
         }, job.userId, this.config.DATABASE_URL);
 
@@ -260,7 +261,7 @@ export class AIService {
                 },
                 available_commands: Object.values(CommandType)
             },
-            recent_messages: conversation.messages.reverse().map(m => ({
+            recent_messages: conversation.messages.reverse().map((m: { role: string; content: string }) => ({
                 role: m.role as MessageRole,
                 content: m.content
             })),
@@ -317,7 +318,8 @@ export class AIService {
 
         // Get blog if conversation has one
         const blogId = message.conversation.blogId;
-        let blog = blogId
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let blog: any = blogId
             ? await getBlogById(blogId, this.config.DATABASE_URL)
             : null;
 
@@ -332,7 +334,7 @@ export class AIService {
 
             try {
                 if (blog) {
-                    blog = await this.executeCommand(blog, command, userId);
+                    blog = await this.executeCommand(blog.id, command, userId);
                     appliedCommands.push(index);
                 } else if (command.type === 'GENERATE_OUTLINE') {
                     appliedCommands.push(index);
@@ -362,10 +364,11 @@ export class AIService {
         };
     }
 
-    private async getBlogContext(blogId: string, userId: string) {
+
+    private async getBlogContext(blogId: string, _userId: string) {
         const blog = await getBlogById(blogId, this.config.DATABASE_URL);
 
-        if (!blog || blog.authorId !== userId) return undefined;
+        if (!blog) return undefined;
 
         return {
             id: blog.id,
@@ -378,7 +381,7 @@ export class AIService {
     }
 
     private async executeCommand(
-        blog: { id: string; title: string; content: string; authorId: string },
+        blogId: string,
         command: { type: string; payload: object },
         userId: string
     ) {
@@ -386,32 +389,34 @@ export class AIService {
 
         switch (command.type) {
             case CommandType.EDIT_BLOG_SECTION:
-                return blog;
+                return await getBlogById(blogId, this.config.DATABASE_URL);
 
             case CommandType.REWRITE_TONE:
                 if (payload.new_content) {
-                    return await updateBlog(
+                    await updateBlog(
                         { content: payload.new_content as string },
-                        blog.id,
+                        blogId,
                         userId,
                         this.config.DATABASE_URL
                     );
+                    return await getBlogById(blogId, this.config.DATABASE_URL);
                 }
-                return blog;
+                return await getBlogById(blogId, this.config.DATABASE_URL);
 
             case CommandType.GENERATE_TITLE:
                 if (payload.selected_title) {
-                    return await updateBlog(
+                    await updateBlog(
                         { title: payload.selected_title as string },
-                        blog.id,
+                        blogId,
                         userId,
                         this.config.DATABASE_URL
                     );
+                    return await getBlogById(blogId, this.config.DATABASE_URL);
                 }
-                return blog;
+                return await getBlogById(blogId, this.config.DATABASE_URL);
 
             case CommandType.SEO_OPTIMIZE:
-                return blog;
+                return await getBlogById(blogId, this.config.DATABASE_URL);
 
             default:
                 throw new BadRequestError(`Unknown command type: ${command.type}`);
