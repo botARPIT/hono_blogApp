@@ -21,7 +21,7 @@ import {
     InternalChatRequest,
     MessageRole
 } from '../types/ai.types';
-import { BlogTag } from '../types/blog.types';
+import { BlogTag, GetBlogDTO } from '../types/blog.types';
 import { NotFoundError, BadRequestError } from '../errors/app-error';
 
 // Repository imports
@@ -318,8 +318,7 @@ export class AIService {
 
         // Get blog if conversation has one
         const blogId = message.conversation.blogId;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let blog: any = blogId
+        let blog: GetBlogDTO | null = blogId
             ? await getBlogById(blogId, this.config.DATABASE_URL)
             : null;
 
